@@ -23,7 +23,11 @@ library(gt)
 dat_vegetation <- folio::vegetation
 ```
 
-# About
+# Motivation
+
+I am making this tutorial for six year younger me. I was in the second year of graduate school, working on my first manuscripts and gaining first experiences with `R`, specifically analysis of RNA-sequencing data and making first visualizations with the `{ggplot2}`. While it felt natural to create figures programatically, I never considered this option for tables. And my mindset did not change two years later when writing my thesis. Over the past year, I have started to use the `{gt}` package and can say: Who wants reproducible, well-documented work should create also tables programatically. My aim is to show that this is possible and that the `{gt}` package has got all basic formatting options (and many I probably still do not know about) covered.
+
+# Introduction
 Tables can serve different purposes: they can represent a full record of raw data (*e.g.*, measurements as in the `vegetation` dataset used in this tutorial) which comes as an appendix of a scientific manuscript, tables can be a stand-alone summary of the data, or a complementary piece of information alongside a chart. In this tutorial, we will generate an example of each, starting from the same input data.
 
 In  larger projects - *e.g.*, a scientific manuscript, a conference poster, or a report which belongs to a series of reports - it is desirable to use common visual elements, such as font family or institution colours. This will be considered when generating individual examples.
