@@ -1,0 +1,125 @@
+---
+title: "Untitled"
+format: html
+---
+
+
+```{r}
+#| label: session-setup
+
+# Data source
+library(folio)
+
+# Data wrangling
+library(dplyr)
+
+# Visualization
+library(gt)
+```
+
+```{r}
+#| label: load-data
+
+dat_vegetation <- folio::vegetation
+```
+
+# About
+Tables can serve different purposes: they can represent a full record of raw data (*e.g.*, measurements as in the `vegetation` dataset used in this tutorial) which comes as an appendix of a scientific manuscript, tables can be a stand-alone summary of the data, or a complementary piece of information alongside a chart. In this tutorial, we will generate an example of each, starting from the same input data.
+
+In  larger projects - *e.g.*, a scientific manuscript, a conference poster, or a report which belongs to a series of reports - it is desirable to use common visual elements, such as font family or institution colours. This will be considered when generating individual examples.
+
+**Data**
+`vegetation` dataset available via the `{folio}` package
+Original publication: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
+# Definition of visual elements
+
+```{r}
+#| label: common-visuals
+
+# gt theme with bold font in column labels
+# and possibility to supply a string to replace NA values
+```
+
+# Scientific notions
+Units, superscripts, correct use of italics in species names. `{gt}` is fully compatible with markdown syntax and we will take advantage of it. We need to prepare the following:
+
+- vs
+- b
+- ebwr
+
+# Creation of a summary table
+
+
+By family and country
+```{r}
+#| label: summarize-by-family-country
+
+veg_summarized <- dat_vegetation |> 
+    group_by(family, country, type) |>
+    summarize(
+        n_plants = n(),
+        mean_d = mean(delta),
+        sd_d = sd(delta),
+        ) |> 
+    ungroup()
+```
+
+## Minimal publication design
+
+```{r}
+#| label: tbl-publication-ready
+#| tbl-cap: Table 
+
+veg_summarized |> 
+    # html for subscript in C3, C4
+    mutate(type = case_when(
+        type == "C3" ~ "C<sub>3</sub>",
+        type == "C4" ~ "C<sub>4</sub>",
+        TRUE ~ type
+    )) |> 
+    gt() |>
+    cols_hide("n_plants") |>
+    tab_style(style = list(
+        cell_text(style = "italic")
+    ),
+    # family names in italics
+    locations = cells_body(columns = "family")
+    ) |> 
+    # families with less than three measurements in grey
+    tab_style(style = list(
+        cell_text(color = "grey50")
+    ),
+    locations = cells_body(columns = everything(),
+    rows = n_plants < 3)
+    ) |> 
+    # ^13^ is markdown for superscript, &delta is html for lower case Greek delta
+    tab_spanner(columns = contains("_d"), label = md("&delta;^13^C")) |> 
+    cols_label(
+        family = "Family",
+        country = "Country",
+        type = "Type",
+        mean_d = "Mean", 
+        sd_d = "SD"
+    ) |> 
+    fmt_markdown(columns = c("type", "mean_d")) |> 
+    fmt_number(columns = c("mean_d", "sd_d"), decimals = 2)
+```
+
+## Advanced design for stand-alone use
+We want to catch attention, therefore we provide more details - countries
+
+### Interactive version
+Maybe you want to draw attention to results of your project or an upcoming presentation. Social media are powerful and an interactive table might be a good option, for example on an institution website.
+
+Sorting, search function
+
+# Creation of an appendix table
+
+Add ID to differentiate multiple specimens of the same species + location
+
+
+```{r}
+
+```
