@@ -11,14 +11,14 @@ format: html
 library(folio)
 
 # Maps
-library(terra)
-library(geodata)
+library(rnaturalearth)
 
 # Data wrangling
 library(dplyr)
 
 # Visualization
 library(gt)
+library(ggplot2)
 ```
 
 ```{r}
@@ -147,8 +147,35 @@ We want to catch attention, therefore we want to use more colours and we can als
 
 ```{r}
 #| label: generate-continent-shapes
+#| results: hide
 
+# ------ Prepare countries  - contiennts data -------------------------------------------------
+world_data <- ne_countries(scale = "medium", returnclass = "sf")
+head(world_data)
 
+# ----- Identify countries and continents needed ----------------------------------------------
+
+# Countries in the data
+vegetation_countries <- c(unique(dat_vegetation$country), "Democratic Republic of the Congo") # Zaire was renamed in 1997
+vegetation_continents <- world_data[world_data$name_en %in% vegetation_countries, ]$continent
+
+# Get their continents
+vegetation_sf_continents <- world_data[world_data$continent %in% vegetation_continents, ]
+
+# Subset the sf world data for countries of interest
+vegetation_sf_countries <- world_data[world_data$name_en %in% vegetation_countries, ]
+
+# ----- Plot continents with countries --------------------------------------------------------
+
+for (cont in vegetation_continents) {
+    # Countries with data on this continent
+    target_country <- vegetation_sf_countries[vegetation_sf_countries$continent == cont & vegetation_sf_countries$name_en %in% vegetation_countries, ]$name_en
+
+    ggplot() +
+    geom_sf(data = vegetation_sf_continents[vegetation_sf_continents$continent == cont, ], fill = "white") +
+    geom_sf(data = vegetation_sf_countries[vegetation_sf_countries$continent == cont & vegetation_sf_countries$name_en == target_country, ], fill = "blue") +
+    theme_void()
+}
 ```
 
 ```{r}
@@ -173,5 +200,4 @@ Add ID to differentiate multiple specimens of the same species + location
 # Resources
 
 Besides package documentation, I found the following resources useful:
-- [https://rfortherestofus.com/2023/08/table-theme-gt](https://rfortherestofus.com/2023/08/table-theme-gt)  
-- [https://www.r-bloggers.com/2023/03/getting-continent-mainland-and-island-maps-in-r/](https://www.r-bloggers.com/2023/03/getting-continent-mainland-and-island-maps-in-r/)  
+- [https://rfortherestofus.com/2023/08/table-theme-gt](https://rfortherestofus.com/2023/08/table-theme-gt)   
