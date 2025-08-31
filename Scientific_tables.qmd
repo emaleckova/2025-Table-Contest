@@ -167,14 +167,20 @@ vegetation_sf_countries <- world_data[world_data$name_en %in% vegetation_countri
 
 # ----- Plot continents with countries --------------------------------------------------------
 
-for (cont in vegetation_continents) {
-    # Countries with data on this continent
-    target_country <- vegetation_sf_countries[vegetation_sf_countries$continent == cont & vegetation_sf_countries$name_en %in% vegetation_countries, ]$name_en
+# individual plots will be collected in this list
+p_ls_countries <- list()
 
-    ggplot() +
-    geom_sf(data = vegetation_sf_continents[vegetation_sf_continents$continent == cont, ], fill = "white") +
-    geom_sf(data = vegetation_sf_countries[vegetation_sf_countries$continent == cont & vegetation_sf_countries$name_en == target_country, ], fill = "blue") +
-    theme_void()
+for (country in vegetation_countries) {
+    # Countries with data on this continent
+    target_continent <- vegetation_sf_countries[vegetation_sf_countries$name_en == country , ]$continent
+
+    p_cont <- ggplot() +
+        geom_sf(data = vegetation_sf_continents[vegetation_sf_continents$continent == target_continent, ], fill = "white") +
+        geom_sf(data = vegetation_sf_countries[vegetation_sf_countries$name_en == country, ], fill = "blue") +
+        theme_void()
+
+    # save in the last, use country name as a label
+    p_ls_countries[[country]] <- p_cont
 }
 ```
 
