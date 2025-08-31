@@ -10,6 +10,10 @@ format: html
 # Data source
 library(folio)
 
+# Maps
+library(terra)
+library(geodata)
+
 # Data wrangling
 library(dplyr)
 
@@ -139,7 +143,17 @@ veg_summarized |>
 ```
 
 ## Advanced design for stand-alone use
-We want to catch attention, therefore we provide more details - countries
+We want to catch attention, therefore we want to use more colours and we can also provide more details - *e.g.*, we can highlight countries in continent shapes.
+
+```{r}
+#| label: generate-continent-shapes
+
+
+```
+
+```{r}
+#| label: highlight-countries-in-continent-shapes
+```
 
 ### Interactive version
 Maybe you want to draw attention to results of your project or an upcoming presentation. Social media are powerful and an interactive table might be a good option, for example on an institution website.
@@ -154,3 +168,10 @@ Add ID to differentiate multiple specimens of the same species + location
 ```{r}
 
 ```
+
+
+# Resources
+
+Besides package documentation, I found the following resources useful:
+- [https://rfortherestofus.com/2023/08/table-theme-gt](https://rfortherestofus.com/2023/08/table-theme-gt)  
+- [https://www.r-bloggers.com/2023/03/getting-continent-mainland-and-island-maps-in-r/](https://www.r-bloggers.com/2023/03/getting-continent-mainland-and-island-maps-in-r/)  
