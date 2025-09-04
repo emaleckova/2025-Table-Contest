@@ -185,7 +185,21 @@ for (country in vegetation_countries) {
 ```
 
 ```{r}
-#| label: highlight-countries-in-continent-shapes
+#| label: tbl-advanced-design
+
+veg_summarized |> 
+    # html for subscript in C3, C4
+    mutate(type = case_when(
+        type == "C3" ~ "C<sub>3</sub>",
+        type == "C4" ~ "C<sub>4</sub>",
+        TRUE ~ type
+    )) |> 
+    mutate(plot_col = "plot") |> 
+    gt() |>
+    text_transform(locations = cells_body(columns = "plot_col"), fn = function(x){
+        p_ls_countries$`Democratic Republic of the Congo` |> 
+            ggplot_image(height = 100, aspect_ratio = 1)
+    })
 ```
 
 ### Interactive version
