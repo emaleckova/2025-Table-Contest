@@ -222,18 +222,23 @@ veg_summarized |>
     type == "C4" ~ "C<sub>4</sub>",
     TRUE ~ type
   )) |>
-  mutate(plot_col = case_when(
+  mutate(country = case_when(
     country == "Zaire" ~ "Democratic Republic of the Congo", # change of name for Zaire
     TRUE ~ country
   )) |>
-  select(type, family, country, mean_d, sd_d, plot_col) |> 
+  select(type, family, country, mean_d, sd_d) |> 
   arrange(type, country, family) |> 
-  gt() |>
+  # group_by(type) |> 
+  gt(rowname_col = "type",
+    groupname_col = "country",  
+    row_group_as_column = T,
+    process_md = T) |> 
   text_transform(
-    locations = cells_body(columns = "plot_col"),
-    fn = function(column) {
-      purrr::map(column, PlotCountry) |>
-        ggplot_image()
+    locations = cells_row_groups(),
+    fn = function(x) {
+      lapply(x, function(y) {
+        gt::html(PlotCountry(y) |> ggplot_image())
+      })
     }
   )
 ```
