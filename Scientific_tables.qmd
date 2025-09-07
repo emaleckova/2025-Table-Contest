@@ -228,13 +228,15 @@ veg_summarized |>
     country == "Zaire" ~ "Democratic Republic of the Congo", # change of name for Zaire
     TRUE ~ country
   )) |>
-  select(type, family, country, mean_d, sd_d) |> 
-  arrange(type, country, family) |> 
-  # group_by(type) |> 
-  gt(rowname_col = "type",
-    groupname_col = "country",  
+  select(type, family, country, mean_d) |>
+  arrange(type, country, family) |>
+  # group_by(type) |>
+  gt(
+    groupname_col = "country",
     row_group_as_column = T,
-    process_md = T) |> 
+    process_md = T
+  ) |>
+  fmt_markdown(columns = "type") |> 
   text_transform(
     locations = cells_row_groups(),
     fn = function(x) {
@@ -242,6 +244,13 @@ veg_summarized |>
         html(PlotCountry(y) |> ggplot_image())
       })
     }
+  ) |>
+  tab_style(
+    style = list(
+      cell_text(style = "italic")
+    ),
+    # family names in italics
+    locations = cells_body(columns = "family")
   )
 ```
 
