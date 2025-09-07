@@ -136,7 +136,7 @@ veg_summarized |>
         mean_d = "Mean", 
         sd_d = "SD"
     ) |> 
-    fmt_markdown(columns = c("type", "mean_d")) |> 
+    fmt_markdown(columns = c("type")) |> 
     fmt_number(columns = c("mean_d", "sd_d"), decimals = 2) |> 
     # basic formatting with the customized theme
     # Note: order matters here - the custom theme defines formatting for column spanners and it must be used only after a (all) spanner(s) were created
@@ -226,6 +226,8 @@ veg_summarized |>
     country == "Zaire" ~ "Democratic Republic of the Congo", # change of name for Zaire
     TRUE ~ country
   )) |>
+  select(type, family, country, mean_d, sd_d, plot_col) |> 
+  arrange(type, country, family) |> 
   gt() |>
   text_transform(
     locations = cells_body(columns = "plot_col"),
