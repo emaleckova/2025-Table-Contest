@@ -205,7 +205,9 @@ PlotCountry <- function(country) {
   p_cont <- ggplot() +
     geom_sf(data = vegetation_sf_continents[vegetation_sf_continents$continent == target_continent, ], fill = "white") +
     geom_sf(data = vegetation_sf_countries[vegetation_sf_countries$name_en == country, ], fill = "blue") +
-    theme_void()
+    labs(title = country) +
+    theme_void() +
+    theme(plot.title = element_text(hjust = 0.5))
   
   return(p_cont)
 }
@@ -237,7 +239,7 @@ veg_summarized |>
     locations = cells_row_groups(),
     fn = function(x) {
       lapply(x, function(y) {
-        gt::html(PlotCountry(y) |> ggplot_image())
+        html(PlotCountry(y) |> ggplot_image())
       })
     }
   )
