@@ -15,6 +15,7 @@ library(rnaturalearth)
 
 # Data wrangling
 library(dplyr)
+library(purrr)
 
 # Visualization
 library(gt)
@@ -69,7 +70,9 @@ paper_gt_theme <- function(gt_table) {
 }
 ```
 
+
 # Scientific notions
+
 Units, superscripts, correct use of italics in species names. `{gt}` is fully compatible with markdown syntax and we will take advantage of it. We need to prepare the following:
 
 - vs
@@ -142,7 +145,9 @@ veg_summarized |>
     tab_footnote(footnote = "Families which have less than three measurements are greyed out.")
 ```
 
+
 ## Advanced design for stand-alone use
+
 We want to catch attention, therefore we want to use more colours and we can also provide more details - *e.g.*, we can highlight countries in continent shapes.
 
 ```{r}
@@ -151,7 +156,7 @@ We want to catch attention, therefore we want to use more colours and we can als
 
 # ------ Prepare countries  - contiennts data -------------------------------------------------
 world_data <- ne_countries(scale = "medium", returnclass = "sf")
-head(world_data)
+# head(world_data)
 
 # ----- Identify countries and continents needed ----------------------------------------------
 
@@ -185,24 +190,55 @@ for (country in vegetation_countries) {
 ```
 
 ```{r}
-#| label: tbl-advanced-design
+#| label: fxn-plot-country
 
-veg_summarized |> 
-    # html for subscript in C3, C4
-    mutate(type = case_when(
-        type == "C3" ~ "C<sub>3</sub>",
-        type == "C4" ~ "C<sub>4</sub>",
-        TRUE ~ type
-    )) |> 
-    mutate(plot_col = "plot") |> 
-    gt() |>
-    text_transform(locations = cells_body(columns = "plot_col"), fn = function(x){
-        p_ls_countries$`Democratic Republic of the Congo` |> 
-            ggplot_image(height = 100, aspect_ratio = 1)
-    })
+# Functions inputs are:
+# country - character vector with name of the country to be highlighted
+
+# Function relies on:
+# vegetation_sf_countries - a combined sf + data.frame object with country coordinates and details; based on data from the {rnaturalearth} package
+
+PlotCountry <- function(country) {
+  # Countries with data on this continent
+  target_continent <- vegetation_sf_countries[vegetation_sf_countries$name_en == country, ]$continent
+
+  p_cont <- ggplot() +
+    geom_sf(data = vegetation_sf_continents[vegetation_sf_continents$continent == target_continent, ], fill = "white") +
+    geom_sf(data = vegetation_sf_countries[vegetation_sf_countries$name_en == country, ], fill = "blue") +
+    theme_void()
+  
+  return(p_cont)
+}
 ```
 
-### Interactive version
+
+```{r}
+#| label: tbl-advanced-design
+
+veg_summarized |>
+  # html for subscript in C3, C4
+  mutate(type = case_when(
+    type == "C3" ~ "C<sub>3</sub>",
+    type == "C4" ~ "C<sub>4</sub>",
+    TRUE ~ type
+  )) |>
+  mutate(plot_col = case_when(
+    country == "Zaire" ~ "Democratic Republic of the Congo", # change of name for Zaire
+    TRUE ~ country
+  )) |>
+  gt() |>
+  text_transform(
+    locations = cells_body(columns = "plot_col"),
+    fn = function(column) {
+      purrr::map(column, PlotCountry) |>
+        ggplot_image()
+    }
+  )
+```
+
+
+## Interactive version
+
 Maybe you want to draw attention to results of your project or an upcoming presentation. Social media are powerful and an interactive table might be a good option, for example on an institution website.
 
 Sorting, search function
@@ -221,3 +257,4 @@ Add ID to differentiate multiple specimens of the same species + location
 
 Besides package documentation, I found the following resources useful:
 - [https://rfortherestofus.com/2023/08/table-theme-gt](https://rfortherestofus.com/2023/08/table-theme-gt)   
+- https://gt.albert-rapp.de/fancy_stuff#add-arbitrary-plots-to-your-table
