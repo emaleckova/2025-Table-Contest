@@ -1,6 +1,12 @@
 ---
 title: "Untitled"
 format: html
+
+message: false
+warning: false
+
+echo: true
+code-fold: true
 ---
 
 
@@ -278,13 +284,17 @@ dat_vegetation |>
   mutate(violin_plot = country) |> 
   arrange(type, country) |>
   gt(
+    id = "countries_tbl",
     groupname_col = "country",
     row_group_as_column = T,
     process_md = T
   ) |>
   fmt_markdown(columns = "type") |> 
+  fmt_number(columns = "mean_d", decimals = 2) |> 
+  tab_spanner(columns = contains(c("mean", "violin")), label = md("&delta;^13^C")) |> 
   cols_label(type = "Type",
-             mean_d = md("Mean &delta;^13^C")) |> 
+             mean_d = "Mean",
+             violin_plot = "Data points") |> 
   # country maps
   text_transform(
     locations = cells_row_groups(),
@@ -302,7 +312,29 @@ dat_vegetation |>
         ggplot_image(height = px(250), aspect_ratio = 1)
     }
   ) |> 
-  tab_footnote(md(folio_footnote))
+  tab_footnote(md(folio_footnote)) |> 
+  tab_options(
+    column_labels.border.top.color = "white",
+    column_labels.border.bottom.color = "white",
+    heading.border.bottom.color =  "white",
+    table_body.border.top.color = "white",
+    table_body.border.bottom.color = "white",
+    table_body.hlines.color =  "white",
+    footnotes.border.bottom.color = "white"
+  ) |> 
+  opt_css(css = "
+    #countries_tbl .gt_table {
+      background: linear-gradient(180deg, #E7A974, #FDDDAB);
+    }
+    
+    #countries_tbl .gt_col_heading, #countries_tbl .gt_footnotes, #countries_tbl .gt_column_spanner_outer, #countries_tbl .gt_row.gt_left.gt_stub_row_group {
+      background:transparent; border-right-style: none;
+    }"
+    ) |> 
+  cols_width(
+    type ~ px(100),
+    mean_d ~ px(200)
+  )
 ```
 
 
@@ -327,4 +359,5 @@ Add ID to differentiate multiple specimens of the same species + location
 
 Besides package documentation, I found the following resources useful:
 - [https://rfortherestofus.com/2023/08/table-theme-gt](https://rfortherestofus.com/2023/08/table-theme-gt)   
-- https://gt.albert-rapp.de/fancy_stuff#add-arbitrary-plots-to-your-table
+- https://gt.albert-rapp.de/fancy_stuff#add-arbitrary-plots-to-your-table  
+- https://gt.albert-rapp.de/styling#tab-options
