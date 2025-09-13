@@ -237,6 +237,9 @@ veg_summarized |>
     process_md = T
   ) |>
   fmt_markdown(columns = "type") |> 
+  cols_label(type = "Type",
+             family = "Family",
+             mean_d = md("Mean &delta;^13^C")) |> 
   text_transform(
     locations = cells_row_groups(),
     fn = function(x) {
@@ -253,6 +256,13 @@ veg_summarized |>
     locations = cells_body(columns = "family")
   )
 ```
+
+
+```{r}
+
+```
+
+
 
 
 ## Interactive version
