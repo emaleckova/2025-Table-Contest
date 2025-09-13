@@ -234,10 +234,10 @@ PlotCountry <- function(target_country) {
 
   p_cont <- ggplot() +
     geom_sf(data = vegetation_sf_continents[vegetation_sf_continents$continent == target_continent, ], fill = "white") +
-    geom_sf(data = vegetation_sf_countries[vegetation_sf_countries$name_en == target_country, ], fill = "blue") +
+    geom_sf(data = vegetation_sf_countries[vegetation_sf_countries$name_en == target_country, ], fill = "#6A4531FF") +
     labs(title = country_label) +
     theme_void() +
-    theme(plot.title = element_text(size = 14, hjust = 0.5))
+    theme(plot.title = element_text(size = 24, hjust = 0.5))
   
   return(p_cont)
 }
@@ -249,18 +249,20 @@ PlotCountry <- function(target_country) {
 
 PlotHalfViolins <- function(target_country){
   p_halfv <- ggplot(filter(dat_vegetation, country == target_country), aes(x = country, y = delta)) +
-    geom_violinhalf(position = position_nudge(x = .2, y = 0)) +
-    geom_jitter(aes(fill = type), alpha = 0.8, width = 0.15) +
+    geom_violinhalf(colour = "#6A4531FF", fill = "#A87250FF", position = position_nudge(x = 0.05, y = 0)) +
+    geom_jitter(aes(fill = type), colour = "#6A4531FF", alpha = 0.8, width = 0.01) +
     scale_y_continuous(breaks = c(-10, -20, -30, -40)) +
     coord_cartesian(ylim = c(-45, -10)) +
     theme_classic() +
-    theme(axis.line.x = element_blank(),
+    theme(plot.margin = margin(0, 0, 0, 0),
+          axis.line.x = element_blank(),
           axis.line.y = element_line(colour = "black", linewidth = 1),
           axis.ticks.y = element_line(colour = "black", linewidth = 1),
           axis.ticks.x = element_blank(),
           axis.text.x = element_blank(),
           axis.text.y = element_text(face = "bold"),
           axis.title = element_blank(),
+          aspect.ratio = 3,
           legend.position = "none")
   
   return(p_halfv)
@@ -273,7 +275,7 @@ PlotHalfViolins <- function(target_country){
 
 dat_vegetation |>
   group_by(country, type) |>
-  summarize(mean_d = mean(delta)) |> 
+  summarize(mean_d = mean(delta)) |>
   # html for subscript in C3, C4
   mutate(type = case_when(
     type == "C3" ~ "C<sub>3</sub>",
@@ -281,7 +283,7 @@ dat_vegetation |>
     TRUE ~ type
   )) |>
   # placeholder column -> violin plots come here
-  mutate(violin_plot = country) |> 
+  mutate(violin_plot = country) |>
   arrange(type, country) |>
   gt(
     id = "countries_tbl",
@@ -289,52 +291,60 @@ dat_vegetation |>
     row_group_as_column = T,
     process_md = T
   ) |>
-  fmt_markdown(columns = "type") |> 
-  fmt_number(columns = "mean_d", decimals = 2) |> 
-  tab_spanner(columns = contains(c("mean", "violin")), label = md("&delta;^13^C")) |> 
-  cols_label(type = "Type",
-             mean_d = "Mean",
-             violin_plot = "Data points") |> 
+  fmt_markdown(columns = "type") |>
+  fmt_number(columns = "mean_d", decimals = 2) |>
+  tab_spanner(columns = contains(c("mean", "violin")), label = md("&delta;^13^C")) |>
+  cols_label(
+    type = "Type",
+    mean_d = "Mean",
+    violin_plot = "Data points"
+  ) |>
   # country maps
   text_transform(
     locations = cells_row_groups(),
     fn = function(x) {
       lapply(x, function(y) {
-        html(PlotCountry(y) |> ggplot_image(height = px(250), aspect_ratio = 3))
+        html(PlotCountry(y) |> ggplot_image(height = px(250), aspect_ratio = 1))
       })
     }
-  ) |> 
+  ) |>
   # half violin + dot plots
   text_transform(
-    locations = cells_body(columns = 'violin_plot'),
+    locations = cells_body(columns = "violin_plot"),
     fn = function(column) {
       map(column, PlotHalfViolins) |>
-        ggplot_image(height = px(250), aspect_ratio = 1)
+        ggplot_image(height = px(250), aspect_ratio = 0.3)
     }
-  ) |> 
-  tab_footnote(md(folio_footnote)) |> 
+  ) |>
+  tab_style(
+    style = list(
+      cell_text(align = "center")
+    ),
+    locations = cells_body(columns = everything())
+  ) |>
   tab_options(
+    heading.align = "center",
     column_labels.border.top.color = "white",
     column_labels.border.bottom.color = "white",
-    heading.border.bottom.color =  "white",
+    heading.border.bottom.color = "white",
     table_body.border.top.color = "white",
     table_body.border.bottom.color = "white",
-    table_body.hlines.color =  "white",
+    table_body.hlines.color = "white",
     footnotes.border.bottom.color = "white"
+  ) |>
+  cols_width(
+    type ~ px(100),
+    mean_d ~ px(100)
   ) |> 
-  opt_css(css = "
+opt_css(css ="
     #countries_tbl .gt_table {
       background: linear-gradient(180deg, #E7A974, #FDDDAB);
     }
     
     #countries_tbl .gt_col_heading, #countries_tbl .gt_footnotes, #countries_tbl .gt_column_spanner_outer, #countries_tbl .gt_row.gt_left.gt_stub_row_group {
       background:transparent; border-right-style: none;
-    }"
-    ) |> 
-  cols_width(
-    type ~ px(100),
-    mean_d ~ px(200)
-  )
+    }") |>
+  tab_footnote(md(folio_footnote))
 ```
 
 
