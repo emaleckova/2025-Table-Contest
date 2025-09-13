@@ -27,6 +27,23 @@ library(see) # half-violin plots
 #| label: load-data
 
 dat_vegetation <- folio::vegetation
+
+# Zaire was renamed in 1997
+dat_vegetation <- dat_vegetation |>
+  mutate(
+    country_label = case_when(
+      country == "Zaire" ~ "Dem. Rep. of Congo",
+      TRUE ~ country
+    ),
+    country = case_when(
+      country == "Zaire" ~ "Democratic Republic of Congo",
+      TRUE ~ country
+    )
+  )
+
+# store as named vector
+country_labels <- sort(unique(dat_vegetation$country_label))
+names(country_labels) <- sort(unique(dat_vegetation$country))
 ```
 
 # Motivation
@@ -162,7 +179,7 @@ world_data <- ne_countries(scale = "medium", returnclass = "sf")
 # ----- Identify countries and continents needed ----------------------------------------------
 
 # Countries in the data
-vegetation_countries <- c(unique(dat_vegetation$country), "Democratic Republic of the Congo") # Zaire was renamed in 1997
+vegetation_countries <- unique(dat_vegetation$country)
 vegetation_continents <- world_data[world_data$name_en %in% vegetation_countries, ]$continent
 
 # Get their continents
@@ -199,14 +216,16 @@ for (country in vegetation_countries) {
 # Function relies on:
 # vegetation_sf_countries - a combined sf + data.frame object with country coordinates and details; based on data from the {rnaturalearth} package
 
-PlotCountry <- function(country) {
+PlotCountry <- function(target_country) {
   # Countries with data on this continent
-  target_continent <- vegetation_sf_countries[vegetation_sf_countries$name_en == country, ]$continent
+  target_continent <- vegetation_sf_countries[vegetation_sf_countries$name_en == target_country, ]$continent
+  
+  country_label <- country_labels[names(country_labels) == target_country]
 
   p_cont <- ggplot() +
     geom_sf(data = vegetation_sf_continents[vegetation_sf_continents$continent == target_continent, ], fill = "white") +
-    geom_sf(data = vegetation_sf_countries[vegetation_sf_countries$name_en == country, ], fill = "blue") +
-    labs(title = country) +
+    geom_sf(data = vegetation_sf_countries[vegetation_sf_countries$name_en == target_country, ], fill = "blue") +
+    labs(title = country_label) +
     theme_void() +
     theme(plot.title = element_text(size = 14, hjust = 0.5))
   
@@ -219,7 +238,7 @@ PlotCountry <- function(country) {
 #| label: fxn-plot-dot-violins
 
 PlotHalfViolins <- function(target_country){
-  p_halfv <- ggplot(dat_vegetation, aes(x = country, y = delta)) +
+  p_halfv <- ggplot(filter(dat_vegetation, country == target_country), aes(x = country, y = delta)) +
     geom_violinhalf(position = position_nudge(x = .2, y = 0)) +
     geom_jitter(aes(fill = type), alpha = 0.8, width = 0.15) +
     scale_y_continuous(breaks = c(-10, -20, -30, -40)) +
@@ -250,10 +269,6 @@ dat_vegetation |>
     type == "C3" ~ "C<sub>3</sub>",
     type == "C4" ~ "C<sub>4</sub>",
     TRUE ~ type
-  )) |>
-  mutate(country = case_when(
-    country == "Zaire" ~ "Democratic Republic of the Congo", # change of name for Zaire
-    TRUE ~ country
   )) |>
   # placeholder column -> violin plots come here
   mutate(violin_plot = country) |> 
