@@ -255,12 +255,14 @@ PlotHalfViolins <- function(target_country){
     coord_cartesian(ylim = c(-45, -10)) +
     theme_classic() +
     theme(plot.margin = margin(0, 0, 0, 0),
+          plot.background = element_blank(),
+          panel.background = element_blank(),
           axis.line.x = element_blank(),
           axis.line.y = element_line(colour = "black", linewidth = 1),
           axis.ticks.y = element_line(colour = "black", linewidth = 1),
           axis.ticks.x = element_blank(),
           axis.text.x = element_blank(),
-          axis.text.y = element_text(face = "bold"),
+          axis.text.y = element_text(size = 16),
           axis.title = element_blank(),
           aspect.ratio = 3,
           legend.position = "none")
