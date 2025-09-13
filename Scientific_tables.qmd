@@ -36,7 +36,7 @@ dat_vegetation <- dat_vegetation |>
       TRUE ~ country
     ),
     country = case_when(
-      country == "Zaire" ~ "Democratic Republic of Congo",
+      country == "Zaire" ~ "Democratic Republic of the Congo",
       TRUE ~ country
     )
   )
