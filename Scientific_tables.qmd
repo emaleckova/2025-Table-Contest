@@ -20,6 +20,7 @@ library(purrr)
 # Visualization
 library(gt)
 library(ggplot2)
+library(see) # half-violin plots
 ```
 
 ```{r}
@@ -215,9 +216,35 @@ PlotCountry <- function(country) {
 
 
 ```{r}
+#| label: fxn-plot-dot-violins
+
+PlotHalfViolins <- function(target_country){
+  p_halfv <- ggplot(dat_vegetation, aes(x = country, y = delta)) +
+    geom_violinhalf(position = position_nudge(x = .2, y = 0)) +
+    geom_jitter(aes(fill = type), alpha = 0.8, width = 0.15) +
+    scale_y_continuous(breaks = c(-10, -20, -30, -40)) +
+    coord_cartesian(ylim = c(-45, -10)) +
+    theme_classic() +
+    theme(axis.line.x = element_blank(),
+          axis.line.y = element_line(colour = "black", linewidth = 1),
+          axis.ticks.y = element_line(colour = "black", linewidth = 1),
+          axis.ticks.x = element_blank(),
+          axis.text.x = element_blank(),
+          axis.text.y = element_text(face = "bold"),
+          axis.title = element_blank(),
+          legend.position = "none")
+  
+  return(p_halfv)
+}
+```
+
+
+```{r}
 #| label: tbl-advanced-design
 
-veg_summarized |>
+dat_vegetation |>
+  group_by(country, type) |>
+  summarize(mean_d = mean(delta)) |> 
   # html for subscript in C3, C4
   mutate(type = case_when(
     type == "C3" ~ "C<sub>3</sub>",
@@ -228,9 +255,9 @@ veg_summarized |>
     country == "Zaire" ~ "Democratic Republic of the Congo", # change of name for Zaire
     TRUE ~ country
   )) |>
-  select(type, family, country, mean_d) |>
-  arrange(type, country, family) |>
-  # group_by(type) |>
+  # placeholder column -> violin plots come here
+  mutate(violin_plot = country) |> 
+  arrange(type, country) |>
   gt(
     groupname_col = "country",
     row_group_as_column = T,
@@ -238,30 +265,25 @@ veg_summarized |>
   ) |>
   fmt_markdown(columns = "type") |> 
   cols_label(type = "Type",
-             family = "Family",
              mean_d = md("Mean &delta;^13^C")) |> 
+  # country maps
   text_transform(
     locations = cells_row_groups(),
     fn = function(x) {
       lapply(x, function(y) {
-        html(PlotCountry(y) |> ggplot_image())
+        html(PlotCountry(y) |> ggplot_image(height = px(250), aspect_ratio = 3))
       })
     }
-  ) |>
-  tab_style(
-    style = list(
-      cell_text(style = "italic")
-    ),
-    # family names in italics
-    locations = cells_body(columns = "family")
+  ) |> 
+  # half violin + dot plots
+  text_transform(
+    locations = cells_body(columns = 'violin_plot'),
+    fn = function(column) {
+      map(column, PlotHalfViolins) |>
+        ggplot_image(height = px(250), aspect_ratio = 1)
+    }
   )
 ```
-
-
-```{r}
-
-```
-
 
 
 
