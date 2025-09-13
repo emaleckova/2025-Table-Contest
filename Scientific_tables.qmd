@@ -44,6 +44,9 @@ dat_vegetation <- dat_vegetation |>
 # store as named vector
 country_labels <- sort(unique(dat_vegetation$country_label))
 names(country_labels) <- sort(unique(dat_vegetation$country))
+
+# Data source footnote
+folio_footnote <- "**Data source:** `vegetation` data from the `{folio}` package"
 ```
 
 # Motivation
@@ -160,7 +163,8 @@ veg_summarized |>
     # Note: order matters here - the custom theme defines formatting for column spanners and it must be used only after a (all) spanner(s) were created
     paper_gt_theme() |> 
     # conditional formatting was introduced and it should be explained - a table footnote is a good place to do so
-    tab_footnote(footnote = "Families which have less than three measurements are greyed out.")
+    tab_footnote(footnote = md(paste(folio_footnote, "<br>", 
+                                  "Families which have less than three measurements are greyed out.")))
 ```
 
 
@@ -297,7 +301,8 @@ dat_vegetation |>
       map(column, PlotHalfViolins) |>
         ggplot_image(height = px(250), aspect_ratio = 1)
     }
-  )
+  ) |> 
+  tab_footnote(md(folio_footnote))
 ```
 
 
