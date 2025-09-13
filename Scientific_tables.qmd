@@ -234,7 +234,7 @@ PlotCountry <- function(target_country) {
 
   p_cont <- ggplot() +
     geom_sf(data = vegetation_sf_continents[vegetation_sf_continents$continent == target_continent, ], fill = "white") +
-    geom_sf(data = vegetation_sf_countries[vegetation_sf_countries$name_en == target_country, ], fill = "#6A4531FF") +
+    geom_sf(data = vegetation_sf_countries[vegetation_sf_countries$name_en == target_country, ], fill = "#1F6E5EFF") +
     labs(title = country_label) +
     theme_void() +
     theme(plot.title = element_text(size = 24, hjust = 0.5))
@@ -249,8 +249,8 @@ PlotCountry <- function(target_country) {
 
 PlotHalfViolins <- function(target_country){
   p_halfv <- ggplot(filter(dat_vegetation, country == target_country), aes(x = country, y = delta)) +
-    geom_violinhalf(colour = "#6A4531FF", fill = "#A87250FF", position = position_nudge(x = 0.05, y = 0)) +
-    geom_jitter(aes(fill = type), colour = "#6A4531FF", alpha = 0.8, width = 0.01) +
+    geom_violinhalf(colour = "#1F6E5EFF", fill = "#005C55FF", position = position_nudge(x = 0.05, y = 0)) +
+    geom_jitter(aes(fill = type), colour = "#1F6E5EFF", alpha = 0.8, width = 0.01) +
     scale_y_continuous(breaks = c(-10, -20, -30, -40)) +
     coord_cartesian(ylim = c(-45, -10)) +
     theme_classic() +
@@ -340,7 +340,7 @@ dat_vegetation |>
   ) |> 
 opt_css(css ="
     #countries_tbl .gt_table {
-      background: linear-gradient(180deg, #E7A974, #FDDDAB);
+      background: linear-gradient(180deg, #3F7F68, #DBD797);
     }
     
     #countries_tbl .gt_col_heading, #countries_tbl .gt_footnotes, #countries_tbl .gt_column_spanner_outer, #countries_tbl .gt_row.gt_left.gt_stub_row_group {
