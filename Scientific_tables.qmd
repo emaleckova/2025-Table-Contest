@@ -29,6 +29,7 @@ library(ggplot2)
 library(see) # half-violin plots
 ```
 
+
 ```{r}
 #| label: load-data
 
@@ -78,6 +79,7 @@ paper_gt_theme <- function(gt_table) {
   gt_table |> 
     # overall aspects such as font and padding
     tab_options(
+      table.font.names = "Times New Roman",
       data_row.padding = px(6),
       heading.align = "center",
       heading.title.font.size = px(26),
@@ -93,7 +95,6 @@ paper_gt_theme <- function(gt_table) {
         style = cell_text(weight = "bold"),
         locations = cells_column_spanners(spanners = everything())
     )      
-    # font family
 }
 ```
 
@@ -237,7 +238,8 @@ PlotCountry <- function(target_country) {
     geom_sf(data = vegetation_sf_countries[vegetation_sf_countries$name_en == target_country, ], fill = "#1F6E5EFF") +
     labs(title = country_label) +
     theme_void() +
-    theme(plot.title = element_text(size = 24, hjust = 0.5))
+    theme(text = element_text(family = "serif"),
+          plot.title = element_text(size = 24, hjust = 0.5))
   
   return(p_cont)
 }
@@ -271,6 +273,14 @@ PlotHalfViolins <- function(target_country){
 }
 ```
 
+
+```{r}
+#| label: set-custom-font
+
+library(showtext) # fonts
+font_add_google(name = "Open Sans", family = "open sans")
+showtext_auto()
+```
 
 ```{r}
 #| label: tbl-advanced-design
@@ -326,6 +336,7 @@ dat_vegetation |>
   ) |>
   tab_options(
     heading.align = "center",
+    table.font.names = "open sans",
     column_labels.border.top.color = "white",
     column_labels.border.bottom.color = "white",
     heading.border.bottom.color = "white",
@@ -343,7 +354,7 @@ opt_css(css ="
       background: linear-gradient(180deg, #3F7F68, #DBD797);
     }
     
-    #countries_tbl .gt_col_heading, #countries_tbl .gt_footnotes, #countries_tbl .gt_column_spanner_outer, #countries_tbl .gt_row.gt_left.gt_stub_row_group {
+    #countries_tbl .gt_col_heading, #countries_tbl .gt_column_spanner_outer, #countries_tbl .gt_row.gt_left.gt_stub_row_group {
       background:transparent; border-right-style: none;
     }") |>
   tab_footnote(md(folio_footnote))
@@ -373,4 +384,4 @@ Besides package documentation, I found the following resources useful:
 - [https://rfortherestofus.com/2023/08/table-theme-gt](https://rfortherestofus.com/2023/08/table-theme-gt)   
 - https://gt.albert-rapp.de/fancy_stuff#add-arbitrary-plots-to-your-table  
 - https://gt.albert-rapp.de/styling#tab-options
-- sPBIYlGn colour palette
+- sPBIYlGn colour palette (https://r-graph-gallery.com/color-palette-finder)
