@@ -1,6 +1,8 @@
 ---
 title: "Untitled"
-format: html
+format:
+  html:
+    embed-resources: true
 
 message: false
 warning: false
@@ -65,6 +67,8 @@ folio_footnote <- "**Data source:** `vegetation` data from the `{folio}` package
 # Motivation
 
 I am making this tutorial for six year younger me. I was in the second year of graduate school, working on my first manuscripts and gaining first experiences with `R`, specifically analysis of RNA-sequencing data and making first visualizations with the `{ggplot2}`. While it felt natural to create figures programatically, I never considered this option for tables. And my mindset did not change two years later when writing my thesis. Over the past year, I have started to use the `{gt}` package and can say: Who wants reproducible, well-documented work should create also tables programatically. My aim is to show that this is possible and that the `{gt}` package has got all basic formatting options (and many I probably still do not know about) covered.
+
+<!-- Demonstrate that gt is compatible with other packages / part of pipleine/report; and how powerful tables are. -->
 
 # Introduction
 Tables can serve different purposes: they can represent a full record of raw data (*e.g.*, measurements as in the `vegetation` dataset used in this tutorial) which comes as an appendix of a scientific manuscript, tables can be a stand-alone summary of the data, or a complementary piece of information alongside a chart. In this tutorial, we will generate an example of each, starting from the same input data.
@@ -250,8 +254,8 @@ PlotCountry <- function(target_country) {
 ```{r}
 #| label: fxn-plot-dot-violins
 
-PlotHalfViolins <- function(data_for_plot) {
-  p_halfv <- ggplot(data_for_plot, aes(x = country, y = delta)) +
+PlotHalfViolins <- function(data_to_plot) {
+  p_halfv <- ggplot(data_to_plot, aes(x = country, y = delta)) +
     geom_violinhalf(colour = "#005C55FF", fill = "#005C55FF", position = position_nudge(x = 0.15, y = 0)) +
     geom_jitter(aes(fill = type), colour = "#005C55FF", alpha = 0.8, width = 0.05) +
     scale_y_continuous(breaks = c(-10, -20, -30, -40)) +
@@ -332,10 +336,10 @@ summarized_tbl_input |>
         target_type <- summarized_tbl_input$type[i]
 
         # Filter the original data and create the plot
-        data_for_plot <- dat_vegetation |>
+        data_to_plot <- dat_vegetation |>
           filter(country == !!target_country, type == !!target_type)
 
-        PlotHalfViolins(data_for_plot) |>
+        PlotHalfViolins(data_to_plot) |>
           ggplot_image(height = px(200), aspect_ratio = 0.3) |>
           html()
       })
@@ -369,7 +373,7 @@ summarized_tbl_input |>
     }
     
     #countries_tbl .gt_col_heading, #countries_tbl .gt_column_spanner_outer, #countries_tbl .gt_row.gt_center.gt_stub, #countries_tbl .gt_row.gt_center.gt_stub_row_group, #countries_tbl .gt_row.gt_left.gt_stub, #countries_tbl .gt_row.gt_left.gt_stub_row_group {
-      background:transparent; border-right-style: none; vertical-align: middle;
+      background: transparent; border-right-style: none; vertical-align: middle;
     }") |>
   tab_footnote(md(folio_footnote))
 ```
@@ -394,29 +398,51 @@ library(ggiraph)
 ```{r}
 #| label: fxn-ggiraph-dot-violins
 
-PlotGirafeViolins <- function(target_country){
-  p_halfv <- ggplot(filter(dat_vegetation, country == target_country), aes(x = country, y = delta)) +
+PlotGirafeViolins <- function(data_to_plot){
+  p_violin <- ggplot(data_to_plot, aes(x = country, y = delta)) +
     geom_violin(colour = "#005C55FF", fill = "#005C55FF", alpha = 0.25) +
     geom_jitter_interactive(aes(tooltip = species), colour = "#005C55FF") +
     scale_y_continuous(breaks = c(-10, -20, -30, -40)) +
     coord_cartesian(ylim = c(-45, -10)) +
     theme_classic() +
-    theme(plot.margin = margin(0, 0, 0, 0),
-          plot.background = element_blank(),
-          panel.background = element_blank(),
-          axis.line.x = element_blank(),
-          axis.line.y = element_line(colour = "black", linewidth = 1),
-          axis.ticks.y = element_line(colour = "black", linewidth = 1),
-          axis.ticks.x = element_blank(),
-          axis.text.x = element_blank(),
-          axis.text.y = element_text(colour = "black", size = 16),
-          axis.title = element_blank(),
-          aspect.ratio = 3,
-          legend.position = "none")
-  
-  g_halfv <- girafe(ggobj = p_halfv)
-  
-  return(g_halfv)
+    theme(
+      plot.margin = margin(0, 0, 0, 0),
+      panel.background = element_rect(
+        fill = "transparent",
+        colour = NA_character_
+      ),
+      plot.background = element_rect(
+        fill = "transparent",
+        colour = NA_character_
+      ),
+      axis.line.x = element_blank(),
+      axis.line.y = element_line(colour = "black", linewidth = 1),
+      axis.ticks.y = element_line(colour = "black", linewidth = 1),
+      axis.ticks.x = element_blank(),
+      axis.text.x = element_blank(),
+      axis.text.y = element_text(colour = "black", size = 16),
+      axis.title = element_blank(),
+      aspect.ratio = 3,
+      legend.position = "none"
+    )
+
+  g_violin <- girafe(
+    ggobj = p_violin,
+    width_svg = 2,
+    height_svg = 3.5
+  ) |>
+    girafe_options(
+      opts_tooltip(css = "background-color: white; text-color: black; font-style: italic;")
+    )
+
+  # Save the ggiraph plot to a temporary HTML file
+  tmpfile <- tempfile(fileext = ".html")
+  save_html(g_violin, tmpfile)
+
+  # Read the content of the HTML file as a single character string
+  plot_html_content <- paste(readLines(tmpfile, warn = FALSE), collapse = "\n")
+
+  return(plot_html_content)
 }
 ```
 
@@ -425,7 +451,93 @@ PlotGirafeViolins <- function(target_country){
 ## Interactive table
 
 ```{r}
+library(htmltools)
+```
 
+
+```{r}
+#| label: tbl-advanced-ggiraph
+
+gt_giraph <- summarized_tbl_input |> 
+  gt(
+    id = "countries_tbl",
+    rowname_col = "type",
+    groupname_col = "country",
+    row_group_as_column = T,
+    process_md = T
+  ) |>
+  fmt_markdown(columns = "type") |>
+  fmt_number(columns = "mean_d", decimals = 2) |>
+  tab_spanner(columns = contains(c("mean", "violin")), label = md("&delta;^13^C")) |>
+  cols_label(
+    type = "Type",
+    mean_d = "Mean",
+    violin_plot = "Data points"
+  ) |>
+  cols_align(align = "center", columns = everything()) |> 
+  # country maps
+  text_transform(
+    locations = cells_row_groups(),
+    fn = function(x) {
+      lapply(x, function(y) {
+        html(PlotCountry(y) |> ggplot_image(height = px(150), aspect_ratio = 1))
+      })
+    }
+  ) |> 
+  # Corrected text_transform
+  text_transform(
+    locations = cells_body(columns = "violin_plot"),
+    fn = function(x) {
+      lapply(1:length(x), function(i) {
+        target_country <- summarized_tbl_input$country[i]
+        target_type <- summarized_tbl_input$type[i]
+
+        data_to_plot <- dat_vegetation |>
+          filter(country == target_country, type == target_type)
+
+        # Call the modified plotting function and wrap in html()
+        PlotGirafeViolins(data_to_plot) |>
+          html()
+      })
+    }
+  ) |> 
+  tab_style(
+    style = list(
+      cell_text(align = "center")
+    ),
+    locations = cells_body(columns = everything())
+  ) |>
+  tab_options(
+    table.width = px(500),
+    table.font.names = "open sans",
+    heading.align = "center",
+    column_labels.border.top.color = "white",
+    column_labels.border.bottom.color = "white",
+    heading.border.bottom.color = "white",
+    table_body.border.top.color = "white",
+    table_body.border.bottom.color = "white",
+    table_body.hlines.color = "white",
+    footnotes.border.bottom.color = "white"
+  ) |>
+  cols_width(
+    type ~ px(100),
+    mean_d ~ px(100)
+  ) |> 
+  opt_css(css ="
+    #countries_tbl .gt_table {
+      background: linear-gradient(180deg, #3F7F68, #DBD797);
+    }
+    
+    #countries_tbl .gt_col_heading, #countries_tbl .gt_column_spanner_outer, #countries_tbl .gt_row.gt_center, #countries_tbl .gt_row.gt_center.gt_stub_row_group, #countries_tbl .gt_row.gt_left.gt_stub, #countries_tbl .gt_row.gt_left.gt_stub_row_group, #countries_tbl .ggiraph-svg, #countries-tbl .girafe_container {
+      background: transparent; border-right-style: none; vertical-align: middle;
+    }") |>
+  tab_footnote(md(folio_footnote))
+
+final_html_output <- as_raw_html(gt_giraph,
+  inline_css = TRUE
+)
+
+write(final_html_output, "interactive_table.html")
 ```
 
 
@@ -438,3 +550,4 @@ Besides package documentation, I found the following resources useful:
 - https://gt.albert-rapp.de/fancy_stuff#add-arbitrary-plots-to-your-table  
 - https://gt.albert-rapp.de/styling#tab-options
 - sPBIYlGn colour palette (https://r-graph-gallery.com/color-palette-finder)
+- Google Gemini for embeding of girafe objects into a gt table
