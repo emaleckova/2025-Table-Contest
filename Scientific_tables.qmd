@@ -313,7 +313,7 @@ summarized_tbl_input |>
   cols_label(
     type = "Type",
     mean_d = "Mean",
-    violin_plot = "Data points"
+    violin_plot = "Measurements"
   ) |>
   cols_align(align = "center", columns = everything()) |> 
   # country maps
@@ -472,7 +472,7 @@ gt_giraph <- summarized_tbl_input |>
   cols_label(
     type = "Type",
     mean_d = "Mean",
-    violin_plot = "Data points"
+    violin_plot = "Measurements"
   ) |>
   cols_align(align = "center", columns = everything()) |> 
   # country maps
