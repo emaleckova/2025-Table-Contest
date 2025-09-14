@@ -33,10 +33,10 @@ library(see) # half-violin plots
 ```{r}
 #| label: load-data
 
-dat_vegetation <- folio::vegetation
+raw_dat_vegetation <- folio::vegetation
 
 # Zaire was renamed in 1997
-dat_vegetation <- dat_vegetation |>
+dat_vegetation <- raw_dat_vegetation |>
   mutate(
     country_label = case_when(
       country == "Zaire" ~ "Dem. Rep. of Congo",
@@ -46,7 +46,13 @@ dat_vegetation <- dat_vegetation |>
       country == "Zaire" ~ "Democratic Republic of the Congo",
       TRUE ~ country
     )
-  )
+  ) |> 
+  # html for subscript in C3, C4
+  mutate(type = case_when(
+    type == "C3" ~ "C<sub>3</sub>",
+    type == "C4" ~ "C<sub>4</sub>",
+    TRUE ~ type
+  ))
 
 # store as named vector
 country_labels <- sort(unique(dat_vegetation$country_label))
@@ -131,12 +137,6 @@ veg_summarized <- dat_vegetation |>
 #| tbl-cap: Mean delta 13 C values for selected C3 and C4 plant families
 
 veg_summarized |> 
-    # html for subscript in C3, C4
-    mutate(type = case_when(
-        type == "C3" ~ "C<sub>3</sub>",
-        type == "C4" ~ "C<sub>4</sub>",
-        TRUE ~ type
-    )) |> 
     gt() |>
     # this is only a helper column used for conditional formatting and it should not be displayed in the final table
     cols_hide("n_plants") |>
@@ -218,6 +218,7 @@ for (country in vegetation_countries) {
 }
 ```
 
+
 ```{r}
 #| label: fxn-plot-country
 
@@ -249,26 +250,28 @@ PlotCountry <- function(target_country) {
 ```{r}
 #| label: fxn-plot-dot-violins
 
-PlotHalfViolins <- function(target_country){
-  p_halfv <- ggplot(filter(dat_vegetation, country == target_country), aes(x = country, y = delta)) +
+PlotHalfViolins <- function(data_for_plot) {
+  p_halfv <- ggplot(data_for_plot, aes(x = country, y = delta)) +
     geom_violinhalf(colour = "#005C55FF", fill = "#005C55FF", position = position_nudge(x = 0.15, y = 0)) +
     geom_jitter(aes(fill = type), colour = "#005C55FF", alpha = 0.8, width = 0.05) +
     scale_y_continuous(breaks = c(-10, -20, -30, -40)) +
     coord_cartesian(ylim = c(-45, -10)) +
     theme_classic() +
-    theme(plot.margin = margin(0, 0, 0, 0),
-          plot.background = element_blank(),
-          panel.background = element_blank(),
-          axis.line.x = element_blank(),
-          axis.line.y = element_line(colour = "black", linewidth = 1),
-          axis.ticks.y = element_line(colour = "black", linewidth = 1),
-          axis.ticks.x = element_blank(),
-          axis.text.x = element_blank(),
-          axis.text.y = element_text(colour = "black", size = 16),
-          axis.title = element_blank(),
-          aspect.ratio = 3,
-          legend.position = "none")
-  
+    theme(
+      plot.margin = margin(0, 0, 0, 0),
+      plot.background = element_blank(),
+      panel.background = element_blank(),
+      axis.line.x = element_blank(),
+      axis.line.y = element_line(colour = "black", linewidth = 1),
+      axis.ticks.y = element_line(colour = "black", linewidth = 1),
+      axis.ticks.x = element_blank(),
+      axis.text.x = element_blank(),
+      axis.text.y = element_text(colour = "black", size = 16),
+      axis.title = element_blank(),
+      aspect.ratio = 3,
+      legend.position = "none"
+    )
+
   return(p_halfv)
 }
 ```
@@ -282,23 +285,20 @@ font_add_google(name = "Open Sans", family = "open sans")
 showtext_auto()
 ```
 
+
 ```{r}
 #| label: tbl-advanced-design
 
-dat_vegetation |>
+summarized_tbl_input <- dat_vegetation |>
   group_by(country, type) |>
   summarize(mean_d = mean(delta)) |>
-  # html for subscript in C3, C4
-  mutate(type = case_when(
-    type == "C3" ~ "C<sub>3</sub>",
-    type == "C4" ~ "C<sub>4</sub>",
-    TRUE ~ type
-  )) |>
-  # placeholder column -> violin plots come here
   mutate(violin_plot = country) |>
-  arrange(type, country) |>
+  arrange(country)
+
+summarized_tbl_input |> 
   gt(
     id = "countries_tbl",
+    rowname_col = "type",
     groupname_col = "country",
     row_group_as_column = T,
     process_md = T
@@ -316,16 +316,28 @@ dat_vegetation |>
     locations = cells_row_groups(),
     fn = function(x) {
       lapply(x, function(y) {
-        html(PlotCountry(y) |> ggplot_image(height = px(250), aspect_ratio = 1))
+        html(PlotCountry(y) |> ggplot_image(height = px(150), aspect_ratio = 1))
       })
     }
   ) |>
   # half violin + dot plots
   text_transform(
     locations = cells_body(columns = "violin_plot"),
-    fn = function(column) {
-      map(column, PlotHalfViolins) |>
-        ggplot_image(height = px(250), aspect_ratio = 0.3)
+    fn = function(x) {
+      # Use `map2` to iterate over the column and the row index simultaneously
+      map2(x, 1:length(x), function(col_value, i) {
+        # Get the row-specific country and type from the summarized data
+        target_country <- summarized_tbl_input$country[i]
+        target_type <- summarized_tbl_input$type[i]
+
+        # Filter the original data and create the plot
+        data_for_plot <- dat_vegetation |>
+          filter(country == !!target_country, type == !!target_type)
+
+        PlotHalfViolins(data_for_plot) |>
+          ggplot_image(height = px(200), aspect_ratio = 0.3) |>
+          html()
+      })
     }
   ) |>
   tab_style(
@@ -335,8 +347,9 @@ dat_vegetation |>
     locations = cells_body(columns = everything())
   ) |>
   tab_options(
-    heading.align = "center",
+    table.width = px(500),
     table.font.names = "open sans",
+    heading.align = "center",
     column_labels.border.top.color = "white",
     column_labels.border.bottom.color = "white",
     heading.border.bottom.color = "white",
@@ -349,13 +362,13 @@ dat_vegetation |>
     type ~ px(100),
     mean_d ~ px(100)
   ) |> 
-opt_css(css ="
+  opt_css(css ="
     #countries_tbl .gt_table {
       background: linear-gradient(180deg, #3F7F68, #DBD797);
     }
     
-    #countries_tbl .gt_col_heading, #countries_tbl .gt_column_spanner_outer, #countries_tbl .gt_row.gt_left.gt_stub_row_group {
-      background:transparent; border-right-style: none;
+    #countries_tbl .gt_col_heading, #countries_tbl .gt_column_spanner_outer, #countries_tbl .gt_row.gt_left.gt_stub, #countries_tbl .gt_row.gt_left.gt_stub_row_group {
+      background:transparent; border-right-style: none; vertical-align: middle;
     }") |>
   tab_footnote(md(folio_footnote))
 ```
@@ -372,10 +385,49 @@ Sorting, search function
 
 Add ID to differentiate multiple specimens of the same species + location
 
+```{r}
+library(ggiraph)
+```
+
+
+```{r}
+#| label: fxn-ggiraph-dot-violins
+
+PlotGirafeViolins <- function(target_country){
+  p_halfv <- ggplot(filter(dat_vegetation, country == target_country), aes(x = country, y = delta)) +
+    geom_violin(colour = "#005C55FF", fill = "#005C55FF", alpha = 0.25) +
+    geom_jitter_interactive(aes(tooltip = species), colour = "#005C55FF") +
+    scale_y_continuous(breaks = c(-10, -20, -30, -40)) +
+    coord_cartesian(ylim = c(-45, -10)) +
+    theme_classic() +
+    theme(plot.margin = margin(0, 0, 0, 0),
+          plot.background = element_blank(),
+          panel.background = element_blank(),
+          axis.line.x = element_blank(),
+          axis.line.y = element_line(colour = "black", linewidth = 1),
+          axis.ticks.y = element_line(colour = "black", linewidth = 1),
+          axis.ticks.x = element_blank(),
+          axis.text.x = element_blank(),
+          axis.text.y = element_text(colour = "black", size = 16),
+          axis.title = element_blank(),
+          aspect.ratio = 3,
+          legend.position = "none")
+  
+  g_halfv <- girafe(ggobj = p_halfv)
+  
+  return(g_halfv)
+}
+```
+
+
+
+## Interactive table
 
 ```{r}
 
 ```
+
+
 
 
 # Resources
