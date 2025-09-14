@@ -311,6 +311,7 @@ summarized_tbl_input |>
     mean_d = "Mean",
     violin_plot = "Data points"
   ) |>
+  cols_align(align = "center", columns = everything()) |> 
   # country maps
   text_transform(
     locations = cells_row_groups(),
@@ -367,7 +368,7 @@ summarized_tbl_input |>
       background: linear-gradient(180deg, #3F7F68, #DBD797);
     }
     
-    #countries_tbl .gt_col_heading, #countries_tbl .gt_column_spanner_outer, #countries_tbl .gt_row.gt_left.gt_stub, #countries_tbl .gt_row.gt_left.gt_stub_row_group {
+    #countries_tbl .gt_col_heading, #countries_tbl .gt_column_spanner_outer, #countries_tbl .gt_row.gt_center.gt_stub, #countries_tbl .gt_row.gt_center.gt_stub_row_group, #countries_tbl .gt_row.gt_left.gt_stub, #countries_tbl .gt_row.gt_left.gt_stub_row_group {
       background:transparent; border-right-style: none; vertical-align: middle;
     }") |>
   tab_footnote(md(folio_footnote))
