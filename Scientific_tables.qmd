@@ -272,7 +272,7 @@ PlotHalfViolins <- function(data_to_plot) {
       axis.text.x = element_blank(),
       axis.text.y = element_text(colour = "black", size = 16),
       axis.title = element_blank(),
-      aspect.ratio = 3,
+      aspect.ratio = 2,
       legend.position = "none"
     )
 
@@ -340,7 +340,7 @@ summarized_tbl_input |>
           filter(country == !!target_country, type == !!target_type)
 
         PlotHalfViolins(data_to_plot) |>
-          ggplot_image(height = px(200), aspect_ratio = 0.3) |>
+          ggplot_image(height = px(200)) |>
           html()
       })
     }
@@ -352,7 +352,7 @@ summarized_tbl_input |>
     locations = cells_body(columns = everything())
   ) |>
   tab_options(
-    table.width = px(500),
+    table.width = px(600),
     table.font.names = "open sans",
     heading.align = "center",
     column_labels.border.top.color = "white",
