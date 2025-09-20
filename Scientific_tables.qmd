@@ -5,6 +5,7 @@ format:
     embed-resources: true
     code-fold: true
     code-summary: "Show code"
+    code-overflow: wrap
 
 toc: true
 number-sections: true
@@ -34,7 +35,7 @@ We will use the `vegetation` dataset available with the `{folio}` package. It is
 
 **Isotopic discrimination**
 
-Depending on the type of photosynthesis, different plant species show different level of discrimination between ^12^C and ^13^C (both stable) isotopes. In an experimental procedure, the ratio * in a sample (here, a green leaf of selected plant species) is compared to ratio in a standard and the difference is reported as parts per thousand: thus the notion δ^13^C. Plants preferentially take up the "light" ^12^C isotope over the "heavier" ^13^C isotopic, resulting in negative ratio. Species which evolved C~4~ of photosynthesis, however, take up ^13^C more frequently which is detectable as a less negative δ^13^C value. 
+Depending on the type of photosynthesis, different plant species show different level of discrimination between ^12^C and ^13^C (both stable) isotopes. In an experimental procedure, the ratio* in a sample (here, a green leaf of selected plant species) is compared to ratio in a standard and the difference is reported as parts per thousand: thus the notion δ^13^C. Plants preferentially take up the "light" ^12^C isotope over the "heavier" ^13^C isotopic, resulting in negative ratio. Species which evolved C~4~ of photosynthesis, however, take up ^13^C more frequently which is detectable as a less negative δ^13^C value. 
 
 \* $δ \ ^{13}C = (\frac{ratio \ in \ sample}{ratio \ in \ standard} - 1) * 1000$
 
@@ -44,7 +45,7 @@ We need access to required packages and obviously to the data with will further 
 
 ```{r}
 #| label: session-setup
-#| fold-code: false
+#| code-fold: false
 
 # Data source
 library(folio)
