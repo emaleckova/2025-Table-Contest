@@ -255,6 +255,7 @@ Besides combining table layout with `{ggplot2}` figures, we will pay attention t
 We will start be loading the `{rnaturalearth}` package which - among many other details about countries - contains assignment of countries to continents and polygons for countries' borders.
 
 ```{r}
+#| eval: false
 library(rnaturalearth)
 ```
 
@@ -638,14 +639,12 @@ tbl_with_plots_gradient |>
 ```
 
 
-
 # Interactive table
 
 Maybe you want to draw attention to results of your project or an upcoming presentation. Social media are powerful and an interactive table might be a good option, for example on an institution website.
 
-Sorting, search function
-
 ```{r}
+#| eval: false
 library(ggiraph)
 ```
 
@@ -698,6 +697,7 @@ PlotGirafeViolins <- function(data_to_plot){
 
 
 ```{r}
+#| eval: false
 library(htmltools)
 ```
 
