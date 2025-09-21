@@ -7,6 +7,8 @@ format:
     code-summary: "Show code"
     code-overflow: wrap
 
+
+
 toc: true
 number-sections: true
 
@@ -131,7 +133,7 @@ paper_gt_theme <- function(gt_table) {
 ```
 
 
-# A minimal publication design {#sec-publication-table}
+# Publication design {#sec-publication-table}
 
 Tables are common is scientific publications but usually rather minimalistic design is prefered. Such tables are not only easy to read but also easy to create with the `{gt}` package - a perfect occasion for the first table of this tutorial. For the demonstration purposes, we will summarize δ^13^C measurement by families and countries.
 
@@ -161,11 +163,10 @@ The custom scheme contains formating options for column spanners and the theme d
 
 ```{r}
 #| label: tbl-publication-ready
-#| tbl-cap: Mean delta 13 C values for selected C3 and C4 plant families
 #| code-fold: false
 
 tbl_publication <- veg_summarized |> 
-    gt() |>
+    gt(id = "summary_tbl") |>
     # this is only a helper column used for conditional formatting and it should not be displayed in the final table
     cols_hide("n_plants") |>
     # replace default NA values with a "-"
@@ -189,11 +190,16 @@ tbl_publication <- veg_summarized |>
     fmt_number(columns = c("mean_d", "sd_d"), decimals = 2) |> 
     # basic formatting with the customized theme
     # Note: order matters here - the custom theme defines formatting for column spanners and it must be used only after a (all) spanner(s) were created
+  cols_width(matches("family") ~ px(150),
+             matches("country") ~ px(250),
+             everything() ~ px(100)) |> 
     paper_gt_theme()
 
 tbl_publication
 ```
 
+
+## Conditional row formatting
 
 We take the existing simple table a little further. In some families, the number of measured species was low and we will use this information for conditional formatting of the affected rows. We will also include a table footnote to explain the formatting right in place.
 
@@ -203,9 +209,8 @@ We take advantage of `n_plants` "helper column" to grey out families with less t
 
 ```{r}
 #| label: tbl-publication-ready-conditional
-#| tbl-cap: Mean delta 13 C values for selected C3 and C4 plant families
 
-tbl_publication |> 
+tbl_publication_conditional <- tbl_publication |> 
     # families with less than three measurements in grey
     tab_style(style = list(
         cell_text(color = "grey50")
@@ -216,10 +221,28 @@ tbl_publication |>
     # conditional formatting was introduced and it should be explained - a table footnote is a good place to do so
     tab_footnote(footnote = md(paste(folio_footnote, "<br>", 
                                   "Families which have less than three measurements are greyed out.")))
+
+tbl_publication_conditional 
 ```
 
 
-# Advanced design for stand-alone use {#sec-advanced-design}
+## Default table processing by Quarto
+
+:::{.callout-tip}
+## Table processing in Quarto
+
+Quarto, by default, applies a Bootstrap CSS class (`table-striped`) to tables generated from code chunks, which introduces row stripping in HTML tables. Row stripping is not common in publications and we thus turn it off in the code chunk below (with `html-table-processing: "none"`) to show how a final publication-ready table might look like.
+:::
+
+```{r}
+#| label: tbl-publication-ready-conditional-stripped
+#| html-table-processing: "none"
+
+tbl_publication_conditional 
+```
+
+
+# Advanced design {#sec-advanced-design}
 
 We want to catch attention, therefore we want to use more colours and we can also provide more details - *e.g.*, we can highlight countries in continent shapes.
 
@@ -247,23 +270,23 @@ vegetation_sf_continents <- world_data[world_data$continent %in% vegetation_cont
 # Subset the sf world data for countries of interest
 vegetation_sf_countries <- world_data[world_data$name_en %in% vegetation_countries, ]
 
-# ----- Plot continents with countries --------------------------------------------------------
-
-# individual plots will be collected in this list
-p_ls_countries <- list()
-
-for (country in vegetation_countries) {
-    # Countries with data on this continent
-    target_continent <- vegetation_sf_countries[vegetation_sf_countries$name_en == country , ]$continent
-
-    p_cont <- ggplot() +
-        geom_sf(data = vegetation_sf_continents[vegetation_sf_continents$continent == target_continent, ], fill = "white") +
-        geom_sf(data = vegetation_sf_countries[vegetation_sf_countries$name_en == country, ], fill = "blue") +
-        theme_void()
-
-    # save in the last, use country name as a label
-    p_ls_countries[[country]] <- p_cont
-}
+# # ----- Plot continents with countries --------------------------------------------------------
+# 
+# # individual plots will be collected in this list
+# p_ls_countries <- list()
+# 
+# for (country in vegetation_countries) {
+#     # Countries with data on this continent
+#     target_continent <- vegetation_sf_countries[vegetation_sf_countries$name_en == country , ]$continent
+# 
+#     p_cont <- ggplot() +
+#         geom_sf(data = vegetation_sf_continents[vegetation_sf_continents$continent == target_continent, ], fill = "white") +
+#         geom_sf(data = vegetation_sf_countries[vegetation_sf_countries$name_en == country, ], fill = "blue") +
+#         theme_void()
+# 
+#     # save in the last, use country name as a label
+#     p_ls_countries[[country]] <- p_cont
+# }
 ```
 
 
