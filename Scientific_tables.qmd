@@ -244,7 +244,18 @@ tbl_publication_conditional
 
 # Advanced design {#sec-advanced-design}
 
-We want to catch attention, therefore we want to use more colours and we can also provide more details - *e.g.*, we can highlight countries in continent shapes.
+In other situations, we may be more creative with our table design. A well-done table can be as catchy as a figure and we can use it to get attention of our readers. In the course of this tutorial, we can think for example of a table for a scientific poster. The `vegetation` data contains details about countries where the δ^13^C measurements were done - highlighting the country's positions in continent shapes should be the eye catcher element of our table.
+
+While working on @tbl-publication-ready-conditional, we realized that there was a different number of measurements in different families. In this section, we will group our data to even smaller numbers of groups and we do not want to loose the detail about the number of underlying datapoints. We will use `ggplot_image()` to include a scatter plot (combined with half-violin plots to visualize the distirbution of measured values even better).
+
+Next, we will pay attention to colours used in the various components of the table. In a real project, it may be for example organisation colours.
+
+`rnaturalearth`
+
+```{r}
+library(rnaturalearth)
+```
+
 
 ```{r}
 #| label: generate-continent-shapes
@@ -436,7 +447,7 @@ summarized_tbl_input |>
   ) |> 
   opt_css(css ="
     #countries_tbl .gt_table {
-      background: linear-gradient(180deg, #3F7F68, #DBD797);
+      background: linear-gradient(180deg, #7DA37BFF, #DBD797);
     }
     
     #countries_tbl .gt_col_heading, #countries_tbl .gt_column_spanner_outer, #countries_tbl .gt_row.gt_center.gt_stub, #countries_tbl .gt_row.gt_center.gt_stub_row_group, #countries_tbl .gt_row.gt_left.gt_stub, #countries_tbl .gt_row.gt_left.gt_stub_row_group {
