@@ -10,6 +10,7 @@ format:
 
 
 toc: true
+toc-expand: true
 number-sections: true
 
 message: false
@@ -64,6 +65,7 @@ library(gt)
 library(ggplot2)
 library(showtext)
 library(see) # half-violin plots
+library(ggiraph)
 library(htmlwidgets)
 ```
 
@@ -248,28 +250,29 @@ In other situations, we may be more creative with our table design. A well-done 
 
 While working on @tbl-publication-ready-conditional, we realized that there was a different number of measurements in different families. In this section, we will group our data to even smaller numbers of groups and we do not want to loose the detail about the number of underlying datapoints. We will use `ggplot_image()` to include a scatter plot (combined with half-violin plots to visualize the distirbution of measured values even better).
 
-Next, we will pay attention to colours used in the various components of the table. In a real project, it may be for example organisation colours.
+Besides combining table layout with `{ggplot2}` figures, we will pay attention to colours used in the various components of the table. In a real project, it may be for example organisation colours. Here, we will use a few colours from the `sPBIYlGn` palette from the `{Redmonder}` package.
 
-`rnaturalearth`
+We will start be loading the `{rnaturalearth}` package which - among many other details about countries - contains assignment of countries to continents and polygons for countries' borders.
 
 ```{r}
 library(rnaturalearth)
 ```
 
+Next, we will proceed with some preprocessing:  
+  1. extract labels (used as plot titles) of countries of interest (those with measurement data) as a named vector - the names are critical to match country names from `dat_vegetation` (and dataframes derived from it) with country polygons from `{rnaturalearth}` (here, loaded as `world_data`)  
+  2. obtain countries data  
+  3. and subset them only to countries from the `vegetation` dataset  
 
 ```{r}
-#| label: generate-continent-shapes
-#| results: hide
-
-# store as named vector
+# 1. Store country labels as a named vector
 country_labels <- sort(unique(dat_vegetation$country_label))
 names(country_labels) <- sort(unique(dat_vegetation$country))
 
-# ------ Prepare countries  - contiennts data -------------------------------------------------
+# 2. Get countries data
 world_data <- ne_countries(scale = "medium", returnclass = "sf")
-# head(world_data)
+# glimpse(world_data)
 
-# ----- Identify countries and continents needed ----------------------------------------------
+# 3. Subset countries data only for countries of interest
 
 # Countries in the data
 vegetation_countries <- unique(dat_vegetation$country)
@@ -280,26 +283,30 @@ vegetation_sf_continents <- world_data[world_data$continent %in% vegetation_cont
 
 # Subset the sf world data for countries of interest
 vegetation_sf_countries <- world_data[world_data$name_en %in% vegetation_countries, ]
-
-# # ----- Plot continents with countries --------------------------------------------------------
-# 
-# # individual plots will be collected in this list
-# p_ls_countries <- list()
-# 
-# for (country in vegetation_countries) {
-#     # Countries with data on this continent
-#     target_continent <- vegetation_sf_countries[vegetation_sf_countries$name_en == country , ]$continent
-# 
-#     p_cont <- ggplot() +
-#         geom_sf(data = vegetation_sf_continents[vegetation_sf_continents$continent == target_continent, ], fill = "white") +
-#         geom_sf(data = vegetation_sf_countries[vegetation_sf_countries$name_en == country, ], fill = "blue") +
-#         theme_void()
-# 
-#     # save in the last, use country name as a label
-#     p_ls_countries[[country]] <- p_cont
-# }
 ```
 
+
+  4. define a custom font
+
+```{r}
+#| label: set-custom-font
+
+library(showtext) # fonts
+font_add_google(name = "Open Sans", family = "open sans")
+showtext_auto()
+```
+
+:::{.callout-tip}
+## Custom font for table and embeded figures
+
+It is a good idea to define the custom font before proceeding with generation of the tables and embeded figures. This will allow us to reference to it when we create these building blocks.
+:::
+
+We will actually produce two figures for each country & plant type (either C~3~ or c ~4~) and as a next step, we will therefore prepare the code for both figures. Because we will use the `{gt}`'s `text_transform()` function to embed `ggplot2` figures into a table, we will wrap the plotting code into functions.
+
+**Country plots**
+
+This function takes a country name is argument and uses it to generate a map based on the `vegetation_sf_continents` object prepared earlier (it basically needs the country and continent polygons).
 
 ```{r}
 #| label: fxn-plot-country
@@ -311,33 +318,56 @@ vegetation_sf_countries <- world_data[world_data$name_en %in% vegetation_countri
 # vegetation_sf_countries - a combined sf + data.frame object with country coordinates and details; based on data from the {rnaturalearth} package
 
 PlotCountry <- function(target_country) {
-  # Countries with data on this continent
+  # Get coordinates of the continent where target country is located
   target_continent <- vegetation_sf_countries[vegetation_sf_countries$name_en == target_country, ]$continent
-  
+  # Country label will be used a plot's title
   country_label <- country_labels[names(country_labels) == target_country]
 
   p_cont <- ggplot() +
+    # entire continent
     geom_sf(data = vegetation_sf_continents[vegetation_sf_continents$continent == target_continent, ], fill = "white") +
+    # highlight target country
     geom_sf(data = vegetation_sf_countries[vegetation_sf_countries$name_en == target_country, ], fill = "#1F6E5EFF") +
     labs(title = country_label) +
+    # removes all grids, axes, etc.
     theme_void() +
-    theme(text = element_text(family = "serif"),
-          plot.title = element_text(size = 24, hjust = 0.5))
+    theme(plot.margin = margin(0, 0, 0, 0),
+          plot.title = element_text(size = 32, hjust = 0.5),
+          text = element_text(family = "open sans"))
   
   return(p_cont)
 }
 ```
 
+Let's give the function try with *Kenya* as an example:
+
+```{r}
+PlotCountry("Kenya")
+```
+
+**Observations and density**
+
+The second figure should summarize observations for each country and type of plant. We will include all measurements as individual data points to give an impression about the size of each group. We will use a devoted `geom_jitter()` to give a little bit of random variation to the points, which is solely for visual purposes. (Note: `geom_point(position = "jitter")` would do the job as well.)
+
+We will combine the scatter plot with half violin plot for an impression about distribution of the measure values. We will include y-axis to help our readers with interpretation of the plots. Nonetheless, we want to ensure that all figures will share the same axis limits to avoid any false interpretations.
 
 ```{r}
 #| label: fxn-plot-dot-violins
 
+### y-axis limits
+# "nice" number are preferred and thus the use of modulo
+# keep in mind that the measure values are negative!
+y_min <- (round(min(dat_vegetation$delta) %% 10, 0) * 10) * -1
+y_max <- (round(max(dat_vegetation$delta) %% 10, 0) * 10) * -1
+
+### Function
 PlotHalfViolins <- function(data_to_plot) {
   p_halfv <- ggplot(data_to_plot, aes(x = country, y = delta)) +
     geom_violinhalf(colour = "#005C55FF", fill = "#005C55FF", position = position_nudge(x = 0.15, y = 0)) +
     geom_jitter(aes(fill = type), colour = "#005C55FF", alpha = 0.8, width = 0.05) +
     scale_y_continuous(breaks = c(-10, -20, -30, -40)) +
-    coord_cartesian(ylim = c(-45, -10)) +
+    # set limits of the y axis
+    coord_cartesian(ylim = c(y_min, y_max)) +
     theme_classic() +
     theme(
       plot.margin = margin(0, 0, 0, 0),
@@ -358,42 +388,102 @@ PlotHalfViolins <- function(data_to_plot) {
 }
 ```
 
+Again, let's see how the ouput of this function looks like:
 
 ```{r}
-#| label: set-custom-font
-
-library(showtext) # fonts
-font_add_google(name = "Open Sans", family = "open sans")
-showtext_auto()
+PlotHalfViolins(dat_vegetation[dat_vegetation$country == "Kenya", ])
 ```
 
+Let's start with a very basic table - with all required building blocks but not much of customized design.
+
+First of all, we will create a little summary table. It will be the basic scaffold to add the `{ggplot2}` components to. We will also calculate mean δ^13^C for each group of plants by their type AND country.
 
 ```{r}
-#| label: tbl-advanced-design
+#| label: summary-data
 
 summarized_tbl_input <- dat_vegetation |>
   group_by(country, type) |>
   summarize(mean_d = mean(delta)) |>
-  mutate(violin_plot = country) |>
   arrange(country)
+```
+
+Next, we will replace the country names with respective plots. We will use the `ggplot_image()` function in combination with `text_transform()` to replace a text (here, country name) with a `ggplot2` graphic created with our custom function.
+
+```{r}
+#| label: tbl-advanced-design-intro
+
+summarized_tbl_input |> 
+  gt() |>
+  # country maps
+  text_transform(
+    locations = cells_row_groups(),
+    fn = function(x) {
+      lapply(x, function(y) {
+        html(PlotCountry(y) |> ggplot_image(height = px(150), aspect_ratio = 1))
+      })
+    }
+  )
+```
+
+
+`text_transform()` has done its job but the resulting table is not visually quite appealing. As we will work on improving it, we will first of all handle the "row groups". For most of the countries, there is only a single group of observations and we included country names in plot titles already. We can move row group labels to columns for a much nicer table
+
+```{r}
+#| label: tbl-advanced-design-1
 
 summarized_tbl_input |> 
   gt(
-    id = "countries_tbl",
+    row_group_as_column = T,
+  ) |>
+  # country maps
+  text_transform(
+    locations = cells_row_groups(),
+    fn = function(x) {
+      lapply(x, function(y) {
+        html(PlotCountry(y) |> ggplot_image(height = px(150), aspect_ratio = 1))
+      })
+    }
+  )
+```
+
+
+Luckily, the `gt()` has a `process_md` argument which makes handling of subscript a super easy task:
+
+```{r}
+#| label: tbl-advanced-design-2
+
+summarized_tbl_input |> 
+  gt(
     rowname_col = "type",
-    groupname_col = "country",
+    row_group_as_column = T,
+    process_md = T
+  ) |> 
+  # country maps
+  text_transform(
+    locations = cells_row_groups(),
+    fn = function(x) {
+      lapply(x, function(y) {
+        html(PlotCountry(y) |> ggplot_image(height = px(150), aspect_ratio = 1))
+      })
+    }
+  )
+```
+
+
+Now, it's time to include the other figure, a combined jitter and half violin plot. Again, we can use `text_transform()` alongside with `ggplot_image()`. However, we need to "provide a new column" to place the graphic into. One option is the `mutate()` function from `{dplyr}` package. We can apply it just before passing our `summarized_tbl_input` into the `gt()` function without any need to really modify this input data.
+
+
+```{r}
+#| label: tbl-advanced-design-3
+
+tbl_with_plots <- summarized_tbl_input |> 
+  # new column for violin + scatter plot assembly
+  mutate(violin_plot = "violin") |> 
+  gt(
+    rowname_col = "type",
     row_group_as_column = T,
     process_md = T
   ) |>
-  fmt_markdown(columns = "type") |>
-  fmt_number(columns = "mean_d", decimals = 2) |>
-  tab_spanner(columns = contains(c("mean", "violin")), label = md("&delta;^13^C")) |>
-  cols_label(
-    type = "Type",
-    mean_d = "Mean",
-    violin_plot = "Measurements"
-  ) |>
-  cols_align(align = "center", columns = everything()) |> 
   # country maps
   text_transform(
     locations = cells_row_groups(),
@@ -422,13 +512,90 @@ summarized_tbl_input |>
           html()
       })
     }
+  )
+
+tbl_with_plots
+```
+
+
+With that, our table's content is complete and we can try to improve it's overall design. There is a lot to do: nicer column labels (`cols_label()`) and formatting of numerical values (`fmt_number()`), alignment of column headers (`cols_align()`) and cell content (`tab_style()` targeting `cell_text()`)
+
+```{r}
+#| label: tbl-advanced-design-4
+
+tbl_with_plots |> 
+  fmt_number(columns = "mean_d", decimals = 2) |>
+  tab_spanner(columns = contains(c("mean", "violin")), label = md("&delta;^13^C")) |>
+  cols_label(
+    type = "Type",
+    mean_d = "Mean",
+    violin_plot = "Measurements"
   ) |>
+  cols_align(align = "center", columns = everything()) |> 
   tab_style(
     style = list(
       cell_text(align = "center")
     ),
     locations = cells_body(columns = everything())
+  )
+```
+
+This is not too bad - but what about setting a nice background colour and adjusting cell borders accordingly? With predefined arguments of `tab_options()` and a little bit of CSS, we can do a lot with relatively little of a code. Even a gradient background!
+
+```{r}
+#| label: tbl-advanced-design-final
+
+tbl_with_plots_gradient <- summarized_tbl_input |> 
+  mutate(violin_plot = "Violin") |> 
+  gt(
+    id = "countries_tbl",
+    rowname_col = "type",
+    row_group_as_column = T,
+    process_md = T
+  ) |> 
+  # country maps
+  text_transform(
+    locations = cells_row_groups(),
+    fn = function(x) {
+      lapply(x, function(y) {
+        html(PlotCountry(y) |> ggplot_image(height = px(150), aspect_ratio = 1))
+      })
+    }
+  ) |> 
+  # half violin + dot plots
+  text_transform(
+    locations = cells_body(columns = "violin_plot"),
+    fn = function(x) {
+      # Use `map2` to iterate over the column and the row index simultaneously
+      map2(x, 1:length(x), function(col_value, i) {
+        # Get the row-specific country and type from the summarized data
+        target_country <- summarized_tbl_input$country[i]
+        target_type <- summarized_tbl_input$type[i]
+
+        # Filter the original data and create the plot
+        data_to_plot <- dat_vegetation |>
+          filter(country == !!target_country, type == !!target_type)
+
+        PlotHalfViolins(data_to_plot) |>
+          ggplot_image(height = px(200)) |>
+          html()
+      })
+    }
+  ) |> 
+  fmt_number(columns = "mean_d", decimals = 2) |>
+  tab_spanner(columns = contains(c("mean", "violin")), label = md("&delta;^13^C")) |>
+  cols_label(
+    type = "Type",
+    mean_d = "Mean",
+    violin_plot = "Measurements"
   ) |>
+  cols_align(align = "center", columns = everything()) |> 
+  tab_style(
+    style = list(
+      cell_text(align = "center")
+    ),
+    locations = cells_body(columns = everything())
+  ) |> 
   tab_options(
     table.width = px(600),
     table.font.names = "open sans",
@@ -452,8 +619,22 @@ summarized_tbl_input |>
     
     #countries_tbl .gt_col_heading, #countries_tbl .gt_column_spanner_outer, #countries_tbl .gt_row.gt_center.gt_stub, #countries_tbl .gt_row.gt_center.gt_stub_row_group, #countries_tbl .gt_row.gt_left.gt_stub, #countries_tbl .gt_row.gt_left.gt_stub_row_group {
       background: transparent; border-right-style: none; vertical-align: middle;
-    }") |>
-  tab_footnote(md(folio_footnote))
+    }")
+
+tbl_with_plots_gradient
+```
+
+
+In case we would use the table as a stand-alone graphic, it is a good idea to inlcude the data source and a little bit of detail about the data. We can do so with `tab_footnote()` (our predefined footnote label will come handy here) and `tab_header`.
+
+```{r}
+#| label: tbl-advanced-design-annotated
+
+tbl_with_plots_gradient |> 
+  tab_header(md("&delta;^13^C is a ratio between ^12^C and ^13^C isotopes; photosynthetically more efficient plant species show less negative values")) |> 
+  tab_footnote(md(folio_footnote)) |> 
+  tab_options(heading.title.font.size = 12,
+              footnotes.font.size = 12)
 ```
 
 
@@ -523,7 +704,7 @@ library(htmltools)
 
 ```{r}
 #| label: tbl-advanced-ggiraph
-
+#| eval: false
 gt_giraph <- summarized_tbl_input |> 
   gt(
     id = "countries_tbl",
