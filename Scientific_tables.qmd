@@ -66,7 +66,7 @@ library(ggplot2)
 library(showtext)
 library(see) # half-violin plots
 library(ggiraph)
-library(htmlwidgets)
+library(htmltools)
 ```
 
 
@@ -676,11 +676,65 @@ tbl_with_plots_gradient |>
 
 # Interactive table {#sec-interactive}
 
-Maybe you want to draw attention to results of your project or an upcoming presentation. Social media are powerful and an interactive table might be a good option, for example on an institution website.
+A digital presentation of results offers more options to be creative, including interactive content (e.g., for for an organization or private website). We will thus transform the poster-ready @tbl-advanced-design-annotated into an interactive one. The interactive component will be the plots - we will display species names on hover over the individual data points. We will use the `{ggiraph}` package to achieve this.
 
 ```{r}
 #| eval: false
+
 library(ggiraph)
+```
+
+We will keep the chosen colour scheme and a visualization combining distribution with individual data points. We will however move from a half-violin plot to a standard violin plot and overlay the measurements (`geom_gitter()`) on top of it. This will give us more room to separate the data points from each other and our reader easier access to the species names.
+
+The [ggiraph-book](https://www.ardata.fr/ggiraph-book/) is an excellent resource about the package and I am thus on purpose cutting this part short. In brief, we use the `_interactive` versions of common `{ggplot2}` geometries to add interactivity to a plot and display the result using the `girafe()` function. For fine tuning the resulting visualization, we can use `CSS`.
+
+Let's use a subset of the `vegetation` data (C4 species of Kenya) while working on the code for an interactive scatter plot overlayed on a violin plot.
+
+```{r}
+#| label: fig-violin-plot
+
+data_to_plot <- dat_vegetation |>
+  filter(country == "Kenya", type == "C<sub>4</sub>")
+
+p_violin <- ggplot(data_to_plot, aes(x = country, y = delta)) +
+  geom_violin(colour = "#005C55FF", fill = "#005C55FF", alpha = 0.25) +
+  geom_jitter_interactive(aes(tooltip = species), shape = 21, size = 3, fill = "#005C55FF", colour = "white") +
+  scale_y_continuous(breaks = c(-10, -20, -30, -40)) +
+  coord_cartesian(ylim = c(-45, -10)) +
+  theme_classic() +
+  theme(
+    plot.margin = margin(0, 0, 0, 0),
+    panel.background = element_blank(),
+    plot.background = element_blank(),
+    axis.line.x = element_blank(),
+    axis.line.y = element_line(colour = "black", linewidth = 1),
+    axis.ticks.y = element_line(colour = "black", linewidth = 1),
+    axis.ticks.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_text(colour = "black", size = 16),
+    axis.title = element_blank(),
+    aspect.ratio = 3,
+    legend.position = "none"
+  )
+
+girafe(
+  ggobj = p_violin,
+  width_svg = 2,
+  height_svg = 3.5,
+  options = "css = background-color: transparent;"
+) |>
+  girafe_options(
+    opts_tooltip(css = "background-color: white; text-color: black; font-style: italic;")
+  )
+```
+
+
+Once happy with the outcome, we again wrap the code in a function so that we can use it later with `text_transform()` as we have done in @sec-poster-design previously. However, we will be displaying an `HTML` content (an htmlwidget) this time. We can dealt with this by saving the ggraph plot into a temporary `HTML` file (`htmltools::save_html()`) which we can then "display" using base R `readLines()` function.
+
+
+```{r}
+#| eval: false
+library(htmltools)
 ```
 
 
@@ -730,17 +784,45 @@ PlotGirafeViolins <- function(data_to_plot){
 }
 ```
 
+In the overall table layout, we can apply all what we have learned before (grouping of rows, use of the `process_md argument`, modifying column labels, etc.), but the `text_transform()` call will become a little more complicated. First of all, we use summarized data `summarized_tbl_input` as a basis for the resulting table (input for the (`gt()` function). At the same time, we need access to the pre-processed, full-length data set (`dat_vegetation`) which is the input for our custom `PlotGirafeViolins()` function.
+
+To generate the correct violin and scatter plot for each row of the resulting table, we: 
+
+  - use `lapply()` to iterate over rows of the "summarized table"  
+  - we keep track with the help of index `i` - this helps us to look up the corresponding `country` and `type` values from the `dat_vegetation` data frame  
+  - the filtered data is input for our `PlotGirafeViolins()` function  
+  - we send the output into `html()` to ensure proper rendering in the final table  
 
 ```{r}
+#| label: text-transform-with-html
+#| code-fold: false
 #| eval: false
-library(htmltools)
+
+text_transform(
+  locations = cells_body(columns = "violin_plot"),
+  fn = function(x) {
+    lapply(1:length(x), function(i) {
+      target_country <- summarized_tbl_input$country[i]
+      target_type <- summarized_tbl_input$type[i]
+
+      data_to_plot <- dat_vegetation |>
+      filter(country == target_country, type == target_type)
+
+      # Call the modified plotting function and wrap in html()
+      PlotGirafeViolins(data_to_plot) |>
+        html()
+    })
+  }
+)
 ```
 
+And integrated with the remaining code, we get a table with known design and components but interactive charts:
 
 ```{r}
 #| label: tbl-advanced-ggiraph
-#| eval: false
+
 gt_giraph <- summarized_tbl_input |> 
+  mutate(violin_plot = "violin_plot") |>
   gt(
     id = "countries_tbl",
     rowname_col = "type",
@@ -766,7 +848,7 @@ gt_giraph <- summarized_tbl_input |>
       })
     }
   ) |> 
-  # Corrected text_transform
+  # text_transform for html
   text_transform(
     locations = cells_body(columns = "violin_plot"),
     fn = function(x) {
@@ -826,8 +908,24 @@ gt_giraph <- summarized_tbl_input |>
 final_html_output <- as_raw_html(gt_giraph,
   inline_css = TRUE
 )
+```
+
+__You don't see anything?__
+
+
+In an interactive RStudio session, rendering works seamlesly, however, for a render Quarto document, we need to save the output into an HTML file
+
+```{r}
+#| label: save-html-file
+#| code-fold: false
 
 write(final_html_output, "interactive_table.html")
+```
+
+which we can refer to in this document and have it displayed correctly:
+
+```{r}
+#| label: display-saved-html-file
 ```
 
 
