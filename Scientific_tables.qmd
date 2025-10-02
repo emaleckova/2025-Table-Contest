@@ -934,6 +934,7 @@ During data analysis for a publication (and other scientific outputs), we may wa
 library(openxlsx2)
 ```
 
+1. We, fill create a new workbook and add a new sheet with defined name to it.
 
 ```{r}
 #| label: create-worksheet
@@ -943,18 +944,46 @@ wbook <- wb_workbook()
 wbook$add_worksheet("Table S1")
 ```
 
+2. We will populate it with data. Before doing so, we will modify the input data frame a bit - for example, change column names and remove the `HTML` syntax fro the `type` column. We can also define number of decimal places.
+
 ```{r}
 #| label: write-data
 
-wbook$add_data("Table S1", veg_summarized)
+export_veg_summarized <- veg_summarized |>
+  mutate(type = gsub("<sub>|</sub>", "", type))
+
+export_veg_summarized <- export_veg_summarized |>
+  rename(
+    "mean delta" = mean_d,
+    "SD delta" = sd_d,
+    "N measurements" = n_plants
+  )
+
+wbook <- wbook$add_numfmt(
+  sheet = 1,
+  dims = wb_dims(
+    # Target all rows from Row 2 (data) to the end
+    rows = 2:(nrow(export_veg_summarized) + 1),
+    cols = 5:6
+  ),
+  # Use the standard Excel number format for two decimal places
+  numfmt = "0.000"
+)
+
+wbook$add_data("Table S1", export_veg_summarized)
 ```
+
+3. We will introduce a minimal formatting to the data in workbook: column headers in bold and family names in italics.
 
 ```{r}
 #| label: format-worksheet
 
-wbook$add_font(dims = wb_dims(rows = 2:nrow(veg_summarized) + 1, cols = 1), italic = T)
+wbook <- wbook$add_font(dims = wb_dims(rows = 1, cols = 1:ncol(export_veg_summarized)), bold = T)
+
+wbook$add_font(dims = wb_dims(rows = 2:(nrow(export_veg_summarized) + 1), cols = 1), italic = T)
 ```
 
+4. Finally, we can export the workbook into an `XLSX` file.
 
 ```{r}
 #| label: save-xlsx
@@ -967,9 +996,9 @@ wb_save(wbook, file = "outputs/Supplementary_data.xlsx")
 
 # Resources
 
-Besides package documentation, I found the following resources useful:
-- [https://rfortherestofus.com/2023/08/table-theme-gt](https://rfortherestofus.com/2023/08/table-theme-gt)   
-- https://gt.albert-rapp.de/fancy_stuff#add-arbitrary-plots-to-your-table  
-- https://gt.albert-rapp.de/styling#tab-options
-- sPBIYlGn colour palette (https://r-graph-gallery.com/color-palette-finder)
-- Google Gemini for embeding of girafe objects into a gt table
+Besides [ggiraph-book](https://www.ardata.fr/ggiraph-book/), [the `openxlsx2` book ](https://janmarvin.github.io/ox2-book/) and [`gt`'s documentation](https://gt.rstudio.com/), excelt and very helpful resources were:  
+
+  - [R for the Rest of Us: How to Create Your Own Table Theme with the gt Package](https://rfortherestofus.com/2023/08/table-theme-gt)  
+  - Albert Rapp's Creating beautiful tables in R with {gt}, particularly [chapter 2.6](https://gt.albert-rapp.de/fancy_stuff#add-arbitrary-plots-to-your-table) and [chapter 4.1.1](https://gt.albert-rapp.de/styling#tab-options)  
+  - [Yan Holtz's Color Palette Finder](https://r-graph-gallery.com/color-palette-finder) - I picked colours from the `sPBIYlGn` colour palette  
+  - Google Gemini to troubleshoot embedding of `ggiraph` objects into a `gt` table  
