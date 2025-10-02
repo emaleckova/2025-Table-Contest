@@ -26,9 +26,9 @@ I am making this tutorial for some six years younger me. I was in the second yea
 
 > Who wants reproducible, well-documented work and matching visual elements should pay attention to the `{gt}` package.
 
-My aim is to show that with the `{gt}` package, it is possible to create a minimalist summary tables ready for a publication (@-sec-XXXXXXXXXXXXX), a small table accompanying a chart (@sec-BBBBBBBB) as well as visually advanced tables suitable - *e.g.*, for a poster - (@sec-YYYYYYYYYY) and even interactive tables - *e.g.*, for a laboratory/project website (@sec-ZZZZZZZZZZZZZ). For scientific topics, we may have special requirements such as italicized taxonomic names, use of subscripts or Greek characters. Thanks to `{gt}`'s inbuilt formatting options and support of `markdown` and `HTML` notions, all of these are easy tasks.
+My aim is to show that with the `{gt}` package, it is possible to create a minimalist summary tables ready for a publication (@-sec-publication-table), a small table accompanying a chart (@sec-xxxx) as well as visually advanced tables suitable - *e.g.*, for a poster - (@sec-poster-design) and even interactive tables - *e.g.*, for a laboratory/project website (@sec-interactive). For scientific topics, we may have special requirements such as italicized taxonomic names, use of subscripts or Greek characters. Thanks to `{gt}`'s inbuilt formatting options and support of `markdown` and `HTML` notions, all of these are easy tasks.
 
-Ideally, our work on a bigger analysis or a project will be structured as an *R project* covering the entire pipeline from data preprocessing to exploratory analysis and to generation of outputs such as figures and tables. It is common to provide *supplementary materials* to a manuscript - for example, a table summarizing our data at a suitable level of detail. This is why @sec-AAAAAAAAAAA provides a little teaser on use of `{xxxxxxxx}` package
+Ideally, our work on a bigger analysis or a project will be structured as an *R project* covering the entire pipeline from data preprocessing to exploratory analysis and to generation of outputs such as figures and tables. It is common to provide *supplementary materials* to a manuscript - for example, a table summarizing our data at a suitable level of detail. This is why @sec-appendix provides a little teaser on use of `{openxlsx}` package
 
 <!-- In  larger projects - *e.g.*, a scientific manuscript, a conference poster, or a report which belongs to a series of reports - it is desirable to use common visual elements, such as font family or institution colours. This will be considered when generating individual examples. -->
 
@@ -67,6 +67,9 @@ library(showtext)
 library(see) # half-violin plots
 library(ggiraph)
 library(htmltools)
+
+# Table export
+library(openxlsx)
 ```
 
 
@@ -719,8 +722,8 @@ p_violin <- ggplot(data_to_plot, aes(x = country, y = delta)) +
 
 girafe(
   ggobj = p_violin,
+  height_svg = 2,
   width_svg = 2,
-  height_svg = 3.5,
   options = "css = background-color: transparent;"
 ) |>
   girafe_options(
@@ -734,6 +737,7 @@ Once happy with the outcome, we again wrap the code in a function so that we can
 
 ```{r}
 #| eval: false
+
 library(htmltools)
 ```
 
@@ -765,8 +769,8 @@ PlotGirafeViolins <- function(data_to_plot){
 
   g_violin <- girafe(
     ggobj = p_violin,
-    width_svg = 2,
-    height_svg = 3.5,
+    width_svg = 1,
+    height_svg = 1.5,
     options = "css = background-color: transparent;"
   ) |>
     girafe_options(
@@ -795,7 +799,7 @@ To generate the correct violin and scatter plot for each row of the resulting ta
 
 ```{r}
 #| label: text-transform-with-html
-#| code-fold: false
+#| echo: true
 #| eval: false
 
 text_transform(
@@ -819,10 +823,10 @@ text_transform(
 And integrated with the remaining code, we get a table with known design and components but interactive charts:
 
 ```{r}
-#| label: tbl-advanced-ggiraph
+#| label: interactive-ggiraph
 
 gt_giraph <- summarized_tbl_input |> 
-  mutate(violin_plot = "violin_plot") |>
+  mutate(violin_plot = "") |>
   gt(
     id = "countries_tbl",
     rowname_col = "type",
@@ -832,6 +836,7 @@ gt_giraph <- summarized_tbl_input |>
   ) |>
   fmt_markdown(columns = "type") |>
   fmt_number(columns = "mean_d", decimals = 2) |>
+  tab_header(md("&delta;^13^C is a ratio between ^12^C and ^13^C isotopes; photosynthetically more efficient plant species show less negative values")) |> 
   tab_spanner(columns = contains(c("mean", "violin")), label = md("&delta;^13^C")) |>
   cols_label(
     type = "Type",
@@ -910,28 +915,23 @@ final_html_output <- as_raw_html(gt_giraph,
 )
 ```
 
-__You don't see anything?__
-
-
-In an interactive RStudio session, rendering works seamlesly, however, for a render Quarto document, we need to save the output into an HTML file
 
 ```{r}
-#| label: save-html-file
-#| code-fold: false
+#| label: tbl-interactive-gt
+#| echo: true
 
-write(final_html_output, "interactive_table.html")
-```
-
-which we can refer to in this document and have it displayed correctly:
-
-```{r}
-#| label: display-saved-html-file
+gt_giraph
 ```
 
 
-# Appendix: Creation of a supplementary table
+# Appendix: Creation of a supplementary table {#sec-appendix}
 
-Add ID to differentiate multiple specimens of the same species + location
+During data analysis for a publication (and other scientific outputs), we may want to share some of the intermediary outputs we have generated - for example, some summarized data may provided as a _supplementary material_ with our publication. We do not need to start from scratch - we simply proceed further with our project.
+
+```{r}
+
+```
+
 
 
 # Resources
