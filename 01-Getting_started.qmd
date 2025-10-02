@@ -28,6 +28,12 @@ library(see) # half-violin plots
 library(ggiraph)
 library(htmltools)
 
+# plot-table assembly
+library(magick)
+library(webshot2)
+library(ggplotify)
+library(patchwork)
+
 # Table export
 library(openxlsx2)
 ```
