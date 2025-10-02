@@ -1,0 +1,8 @@
+# Resources
+
+Besides [ggiraph-book](https://www.ardata.fr/ggiraph-book/), [the `openxlsx2` book ](https://janmarvin.github.io/ox2-book/) and [`gt`'s documentation](https://gt.rstudio.com/), excelt and very helpful resources were:  
+
+  - [R for the Rest of Us: How to Create Your Own Table Theme with the gt Package](https://rfortherestofus.com/2023/08/table-theme-gt)  
+  - Albert Rapp's Creating beautiful tables in R with {gt}, particularly [chapter 2.6](https://gt.albert-rapp.de/fancy_stuff#add-arbitrary-plots-to-your-table) and [chapter 4.1.1](https://gt.albert-rapp.de/styling#tab-options)  
+  - [Yan Holtz's Color Palette Finder](https://r-graph-gallery.com/color-palette-finder) - I picked colours from the `sPBIYlGn` colour palette  
+  - Google Gemini to troubleshoot embedding of `ggiraph` objects into a `gt` table  

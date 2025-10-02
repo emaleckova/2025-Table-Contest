@@ -1,0 +1,80 @@
+---
+
+---
+
+```{r}
+#| echo: false
+
+source("_setup.R")
+
+load("helpers/Global_objects.rds")
+```
+
+# Appendix: Creation of a supplementary table {#sec-appendix}
+
+During data analysis for a publication (and other scientific outputs), we may want to share some of the intermediary outputs we have generated - for example, some summarized data may provided as a _supplementary material_ with our publication. We do not need to start from scratch - we simply proceed further with our project. There are probably multiple ways to achieve the goal of this section, we will  use `{openxlsx}` package.
+
+```{r}
+#| eval: true
+
+library(openxlsx2)
+```
+
+1. We, fill create a new workbook and add a new sheet with defined name to it.
+
+```{r}
+#| label: create-worksheet
+
+wbook <- wb_workbook()
+
+wbook$add_worksheet("Table S1")
+```
+
+2. We will populate it with data. Before doing so, we will modify the input data frame a bit - for example, change column names and remove the `HTML` syntax fro the `type` column. We can also define number of decimal places.
+
+```{r}
+#| label: write-data
+
+export_veg_summarized <- veg_summarized |>
+  mutate(type = gsub("<sub>|</sub>", "", type))
+
+export_veg_summarized <- export_veg_summarized |>
+  rename(
+    "mean delta" = mean_d,
+    "SD delta" = sd_d,
+    "N measurements" = n_plants
+  )
+
+wbook <- wbook$add_numfmt(
+  sheet = 1,
+  dims = wb_dims(
+    # Target all rows from Row 2 (data) to the end
+    rows = 2:(nrow(export_veg_summarized) + 1),
+    cols = 5:6
+  ),
+  # Use the standard Excel number format for two decimal places
+  numfmt = "0.000"
+)
+
+wbook$add_data("Table S1", export_veg_summarized)
+```
+
+3. We will introduce a minimal formatting to the data in workbook: column headers in bold and family names in italics.
+
+```{r}
+#| label: format-worksheet
+
+wbook <- wbook$add_font(dims = wb_dims(rows = 1, cols = 1:ncol(export_veg_summarized)), bold = T)
+
+wbook$add_font(dims = wb_dims(rows = 2:(nrow(export_veg_summarized) + 1), cols = 1), italic = T)
+```
+
+4. Finally, we can export the workbook into an `XLSX` file.
+
+```{r}
+#| label: save-xlsx
+
+dir.create("outputs")
+
+wb_save(wbook, file = "outputs/Supplementary_data.xlsx")
+```

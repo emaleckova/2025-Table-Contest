@@ -1,0 +1,180 @@
+---
+
+---
+
+```{r}
+#| echo: false
+
+source("_setup.R")
+
+load(file = "helpers/Global_objects.rds")
+```
+
+# Publication design {#sec-publication-table}
+
+Tables are common is scientific publications but usually rather minimalist design is preferred. Such tables are not only easy to read but also easy to create with the `{gt}` package - a perfect occasion for the first table of this tutorial. For the demonstration purposes, we will summarize δ^13^C measurement by families and countries.
+
+```{r}
+#| label: summarize-by-family-country
+
+veg_summarized <- dat_vegetation |> 
+    group_by(family, country, type) |>
+    summarize(
+      n_plants = n(), # number of underlying measurements
+      mean_d = mean(delta),
+      sd_d = sd(delta),
+      ) |> 
+    ungroup()
+```
+
+## Simplest table
+
+Displaying a data frame as a `gt` table is a straightforward process and the default design is pleasing. However, our table will require some additional formatting to satisfy taxonomical and scietific conventions given by the data.
+
+```{r}
+#| label: tbl-deafults
+#| code-fold: false
+
+tbl_plain <- veg_summarized |> 
+    gt()
+
+tbl_plain
+```
+
+
+## Scientific and  other formatting
+
+We will choose if there are any columns we would like to hide - here the `n_plants` which we introduced as helper column to control conditional formatting (in @sec-conditional-rows). We take advantage of `sub_missing()` function which helps us to handle missing values (`NA`s) according to our preference without the need to modify the input data directly or by introducing a helper column.
+
+With `tab_style()` we can easily italicize an entire column and with `cols_label()` we can turn existing variable names into a meaningful and appealing column labels. When setting up a spanner over the numerical columns, we use `markdown` to achieve proper formatting. `fmt_number()` makes common number formatting options a simple task - we use to control number of decimal places.
+
+
+```{r}
+#| label: tbl-publication
+
+tbl_formatted <- tbl_plain |>
+    # this is only a helper column used for conditional formatting and it should not be displayed in the final table
+    cols_hide("n_plants") |>
+    # replace default NA values with a "-"
+    # Note: modifying the data with {dplyr} functions would work equally well but {gt} has a devoted function for this purpose
+    sub_missing(columns = "sd_d", missing_text = "-") |>
+    tab_style(style = list(
+        cell_text(style = "italic")),
+    # family names in italics
+    locations = cells_body(columns = "family")
+    ) |> 
+    # ^13^ is markdown for superscript, &delta is html for lower case Greek delta
+    tab_spanner(columns = contains("_d"), label = md("&delta;^13^C")) |> 
+    cols_label(
+        family = "Family",
+        country = "Country",
+        type = "Type",
+        mean_d = "Mean", 
+        sd_d = "SD"
+    ) |> 
+    fmt_markdown(columns = c("type")) |> 
+    fmt_number(columns = c("mean_d", "sd_d"), decimals = 2) |> 
+    # basic formatting with the customized theme
+    # Note: order matters here - the custom theme defines formatting for column spanners and it must be used only after a (all) spanner(s) were created
+  cols_width(matches("family") ~ px(150),
+             matches("country") ~ px(250),
+             everything() ~ px(100))
+
+tbl_formatted
+```
+
+## Custom theme
+
+A publication may contain multiple figures. Instead of repeating the same code again and potentially making the same adjustments at multiple places if we decide to make changes to the table design, we can define a custom theme once. We use `{gt}` function and formatting options as with a regular table but wrap all of our code into a function. In our theme, we will define font family and size for individual components of the table. We will also ensure that column headings are displayed in bold font face.
+
+```{r}
+#| label: gt-publication-theme
+
+paper_gt_theme <- function(gt_table) {
+  gt_table |> 
+    # overall aspects such as font and padding
+    tab_options(
+      table.font.names = "Times New Roman",
+      data_row.padding = px(6),
+      heading.align = "center",
+      heading.title.font.size = px(26),
+      heading.subtitle.font.size = px(14),
+      table_body.hlines.width = px(0)
+    ) |> 
+    # column labels and spanners in bold font face
+    tab_style(
+        style = cell_text(weight = "bold"),
+        locations = cells_column_labels(everything())
+    ) |> 
+    tab_style(
+        style = cell_text(weight = "bold"),
+        locations = cells_column_spanners(spanners = everything())
+    )      
+}
+```
+
+
+:::{.callout-warning}
+## Custom theme placement
+
+The custom scheme contains formatting options for column spanners and the theme definition **must** thus come only once spanner were defined. In other case, they will remain unaffected by the custom theme.
+:::
+
+```{r}
+#| label: tbl-publication-themed
+
+tbl_formatted |>
+  paper_gt_theme()
+```
+
+
+## Conditional row formatting {#sec-conditional-rows}
+
+We take the existing, formatted table a little further. In some families, the number of measured species was low and we will use this information for conditional formatting of the affected rows. We will also include a table footnote to explain the formatting right in place.
+
+We stored the previous table as a gt table and we will take advantage of it. We can add additional formatting options to existing gt object which is more elegant and less error-prone than copy-pasting of longer pieces of code.
+
+We take advantage of `n_plants` "helper column" to grey out families with less than three measurements, with `tab_footnote()` we can easily provide more details about meaning of the formatting options.
+
+```{r}
+#| label: tbl-publication-ready-conditional
+
+tbl_publication_conditional <- tbl_formatted |>
+  paper_gt_theme() |>
+  # families with less than three measurements in grey
+  tab_style(style = list(
+    cell_text(color = "grey50")
+    ),
+    locations = cells_body(columns = everything(),
+                           rows = n_plants < 3)
+    ) |> 
+  # conditional formatting was introduced and it should be explained - a table footnote is a good place to do so
+  tab_footnote(footnote = md(paste(folio_footnote, "<br>", 
+                                   "Families which have less than three measurements are greyed out.")))
+
+tbl_publication_conditional 
+```
+
+
+## Default table processing by Quarto
+
+:::{.callout-tip}
+## Table processing in Quarto
+
+Quarto, by default, applies a Bootstrap CSS class (`table-striped`) to tables generated from code chunks, which introduces row stripping in HTML tables. Row stripping is not common in publications and we thus turn it off in the code chunk below (with `html-table-processing: "none"`) to show how a final publication-ready table might look like.
+:::
+
+```{r}
+#| label: tbl-publication-ready-conditional-stripped
+#| html-table-processing: "none"
+
+tbl_publication_conditional 
+```
+
+
+```{r}
+#| echo: false
+
+save(list = c("dat_vegetation", "folio_footnote", "veg_summarized"), file = "helpers/Global_objects.rds")
+```
+

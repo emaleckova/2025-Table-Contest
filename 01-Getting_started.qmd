@@ -1,0 +1,77 @@
+---
+
+---
+
+# Getting started
+
+We need access to required packages and obviously to the data with will further work with. I like to load all packages right at beginning of the document for a convenient overview of all required dependencies. I will point out some of the packages when we need them later.
+
+```{r}
+#| label: session-setup
+#| echo: true
+
+# Data source
+library(folio)
+
+# Maps
+library(rnaturalearth)
+
+# Data wrangling, functional programming functions
+library(dplyr)
+library(purrr)
+
+# Visualization
+library(gt)
+library(ggplot2)
+library(showtext)
+library(see) # half-violin plots
+library(ggiraph)
+library(htmltools)
+
+# Table export
+library(openxlsx2)
+```
+
+
+After loading the data, some preprocessing will be handy to avoid troubles and repetitive handling of the issues again and again. For example, in @sec-advanced-design we will draw in earth map data to visualize countries. It turnes out that the `{rnaturalearth}` packages which is a common source of geographical data refers to *Democratic Republic of the Congo*, while the authors of the original publication use older name *Zaire*. Besides making this fix, we will also introduce an abbreviated version of the current country's name to save some space in plot titles (also relevant in @sec-advanced-design). We will also introduce `C<sub>3</sub>` and `C<sub>4</sub>` in the `type` column to set us for a nicely formatted spelling throughout all tables.
+
+```{r}
+#| label: load-data
+
+raw_dat_vegetation <- folio::vegetation
+
+# Zaire was renamed in 1997
+dat_vegetation <- raw_dat_vegetation |>
+  mutate(
+    country_label = case_when(
+      country == "Zaire" ~ "Dem. Rep. of Congo",
+      TRUE ~ country
+    ),
+    country = case_when(
+      country == "Zaire" ~ "Democratic Republic of the Congo",
+      TRUE ~ country
+    )
+  ) |> 
+  # html for subscript in C3, C4
+  mutate(type = case_when(
+    type == "C3" ~ "C<sub>3</sub>",
+    type == "C4" ~ "C<sub>4</sub>",
+    TRUE ~ type
+  ))
+```
+
+In some of the tables, we will refer to the data source in the table's footnote and we thus create a reusable footnote label early on. Note `markdown` syntax for bold and monospace text:
+
+```{r}
+#| label: common-elements
+
+# Data source footnote
+folio_footnote <- "**Data source:** `vegetation` data from the `{folio}` package"
+```
+
+```{r}
+#| echo: false
+
+save(list = c("dat_vegetation", "folio_footnote"), file = "helpers/Global_objects.rds")
+```
+

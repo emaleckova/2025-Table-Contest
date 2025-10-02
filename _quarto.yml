@@ -1,0 +1,34 @@
+project:
+  type: book
+
+book:
+  title: "{gt} tables for science (The 2025 Table Contest)"
+  author: "Eva Maleckova"
+  date: "Oct 02 2025"
+  chapters:
+    - index.qmd
+    - 01-Getting_started.qmd
+    - 02-Publication_table.qmd
+    - 03-Plot_table_assembly.qmd
+    - 04-Poster_design.qmd
+    - 05-Interactivate_table.qmd
+    - 06-Appendix.qmd
+    - 07-Resources.qmd
+
+number-depth: 2
+
+format:
+  html:
+    theme: cosmo
+    embed-resources: true
+    code-fold: true
+    code-summary: "Show code"
+    code-overflow: wrap
+    
+toc: true
+toc-expand: true
+number-sections: true
+
+message: false
+warning: false
+echo: true
