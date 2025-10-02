@@ -28,7 +28,7 @@ I am making this tutorial for some six years younger me. I was in the second yea
 
 My aim is to show that with the `{gt}` package, it is possible to create a minimalist summary tables ready for a publication (@-sec-publication-table), a small table accompanying a chart (@sec-xxxx) as well as visually advanced tables suitable - *e.g.*, for a poster - (@sec-poster-design) and even interactive tables - *e.g.*, for a laboratory/project website (@sec-interactive). For scientific topics, we may have special requirements such as italicized taxonomic names, use of subscripts or Greek characters. Thanks to `{gt}`'s inbuilt formatting options and support of `markdown` and `HTML` notions, all of these are easy tasks.
 
-Ideally, our work on a bigger analysis or a project will be structured as an *R project* covering the entire pipeline from data preprocessing to exploratory analysis and to generation of outputs such as figures and tables. It is common to provide *supplementary materials* to a manuscript - for example, a table summarizing our data at a suitable level of detail. This is why @sec-appendix provides a little teaser on use of `{openxlsx}` package
+Ideally, our work on a bigger analysis or a project will be structured as an *R project* covering the entire pipeline from data preprocessing to exploratory analysis and to generation of outputs such as figures and tables. It is common to provide *supplementary materials* to a manuscript - for example, a table summarizing our data at a suitable level of detail. This is why @sec-appendix provides a little teaser on use of `{openxlsx2}` package
 
 <!-- In  larger projects - *e.g.*, a scientific manuscript, a conference poster, or a report which belongs to a series of reports - it is desirable to use common visual elements, such as font family or institution colours. This will be considered when generating individual examples. -->
 
@@ -69,7 +69,7 @@ library(ggiraph)
 library(htmltools)
 
 # Table export
-library(openxlsx)
+library(openxlsx2)
 ```
 
 
@@ -926,12 +926,43 @@ gt_giraph
 
 # Appendix: Creation of a supplementary table {#sec-appendix}
 
-During data analysis for a publication (and other scientific outputs), we may want to share some of the intermediary outputs we have generated - for example, some summarized data may provided as a _supplementary material_ with our publication. We do not need to start from scratch - we simply proceed further with our project.
+During data analysis for a publication (and other scientific outputs), we may want to share some of the intermediary outputs we have generated - for example, some summarized data may provided as a _supplementary material_ with our publication. We do not need to start from scratch - we simply proceed further with our project. There are probably multiple ways to achieve the goal of this section, we will  use `{openxlsx}` package.
 
 ```{r}
+#| eval: false
 
+library(openxlsx2)
 ```
 
+
+```{r}
+#| label: create-worksheet
+
+wbook <- wb_workbook()
+
+wbook$add_worksheet("Table S1")
+```
+
+```{r}
+#| label: write-data
+
+wbook$add_data("Table S1", veg_summarized)
+```
+
+```{r}
+#| label: format-worksheet
+
+wbook$add_font(dims = wb_dims(rows = 2:nrow(veg_summarized) + 1, cols = 1), italic = T)
+```
+
+
+```{r}
+#| label: save-xlsx
+
+dir.create("outputs")
+
+wb_save(wbook, file = "outputs/Supplementary_data.xlsx")
+```
 
 
 # Resources
