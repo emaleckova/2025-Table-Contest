@@ -6,8 +6,7 @@
 #| echo: false
 
 source("_setup.R")
-
-load(file = "helpers/Global_objects.rds")
+source("_objects.R")
 ```
 
 

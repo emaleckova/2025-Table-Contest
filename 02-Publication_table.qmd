@@ -1,13 +1,8 @@
----
-
----
-
 ```{r}
 #| echo: false
 
 source("_setup.R")
-
-load(file = "helpers/Global_objects.rds")
+source("_objects.R")
 ```
 
 # Publication design {#sec-publication-table}
@@ -172,9 +167,5 @@ tbl_publication_conditional
 ```
 
 
-```{r}
-#| echo: false
 
-save(list = c("dat_vegetation", "folio_footnote", "veg_summarized"), file = "helpers/Global_objects.rds")
-```
 

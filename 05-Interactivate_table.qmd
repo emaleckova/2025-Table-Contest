@@ -1,18 +1,13 @@
----
-
----
-
+# Interactive table {#sec-interactive}
 
 ```{r}
 #| echo: false
 
 source("_setup.R")
-
-load("helpers/Global_objects.rds")
+# Source shared objects and functions for reliable publishing
+source("_objects.R")
 ```
 
-
-# Interactive table {#sec-interactive}
 
 A digital presentation of results offers more options to be creative, including interactive content (e.g., for for an organization or private website). We will thus transform the poster-ready @tbl-advanced-design-annotated into an interactive one. The interactive component will be the plots - we will display species names on hover over the individual data points. We will use the `{ggiraph}` package to achieve this.
 
@@ -160,7 +155,7 @@ And integrated with the remaining code, we get a table with known design and com
 ```{r}
 #| label: interactive-ggiraph
 
-gt_giraph <- summarized_tbl_input |> 
+summarized_tbl_input |> 
   mutate(violin_plot = "") |>
   gt(
     id = "countries_tbl",
@@ -245,15 +240,8 @@ gt_giraph <- summarized_tbl_input |>
     }") |>
   tab_footnote(md(folio_footnote))
 
-final_html_output <- as_raw_html(gt_giraph,
-  inline_css = TRUE
-)
+# final_html_output <- as_raw_html(gt_giraph,
+#   inline_css = TRUE
+# )
 ```
 
-
-```{r}
-#| label: tbl-interactive-gt
-#| echo: true
-
-gt_giraph
-```

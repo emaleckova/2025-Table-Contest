@@ -1,11 +1,9 @@
----
 
----
+::: {.callout-info}
+## The Table Contest
 
-
-This book is a tutorial contribution for __The 2025 Table Contest__.
-
---------------------------------------------------------------------
+**The Table Contest** by Posit is an annual event and this book is a tutorial contribution for the 2025 edition.
+:::
 
 # Motivation
 
@@ -13,7 +11,7 @@ I am making this tutorial for some six years younger me. I was in the second yea
 
 > Who wants reproducible, well-documented work and matching visual elements should pay attention to the `{gt}` package.
 
-My aim is to show that with the `{gt}` package, it is possible to create a minimalist summary tables ready for a publication (@-sec-publication-table), a small table accompanying a chart (@sec-ggplot-assembly) as well as visually advanced tables suitable - *e.g.*, for a poster - (@sec-poster-design) and even interactive tables - *e.g.*, for a laboratory/project website (@sec-interactive). For scientific topics, we may have special requirements such as italicized taxonomic names, use of subscripts or Greek characters. Thanks to `{gt}`'s inbuilt formatting options and support of `markdown` and `HTML` notions, all of these are easy tasks.
+My aim is to show that with the `{gt}` package, it is possible to create a minimalist summary tables ready for a publication (@sec-publication-table), a small table accompanying a chart (@sec-ggplot-assembly) as well as visually advanced tables suitable - *e.g.*, for a poster - (@sec-poster-design) and even interactive tables - *e.g.*, for a laboratory/project website (@sec-interactive). For scientific topics, we may have special requirements such as italicized taxonomic names, use of subscripts or Greek characters. Thanks to `{gt}`'s inbuilt formatting options and support of `markdown` and `HTML` notions, all of these are easy tasks.
 
 Ideally, our work on a bigger analysis or a project will be structured as an *R project* covering the entire pipeline from data preprocessing to exploratory analysis and to generation of outputs such as figures and tables. It is common to provide *supplementary materials* to a manuscript - for example, a table summarizing our data at a suitable level of detail. This is why @sec-appendix provides a little teaser on use of `{openxlsx2}` package
 

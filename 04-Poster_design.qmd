@@ -6,8 +6,7 @@
 #| echo: false
 
 source("_setup.R")
-
-load(file = "helpers/Global_objects.rds")
+source("_objects.R")
 ```
 
 # Poster design {#sec-poster-design}
@@ -418,9 +417,5 @@ tbl_with_plots_gradient |>
 ```
 
 
-```{r}
-#| echo: false
 
-save(list = c("dat_vegetation", "folio_footnote", "veg_summarized", "summarized_tbl_input"), file = "helpers/Global_objects.rds")
-```
 

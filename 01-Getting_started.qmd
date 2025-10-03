@@ -1,7 +1,3 @@
----
-
----
-
 # Getting started
 
 We need access to required packages and obviously to the data with will further work with. I like to load all packages right at beginning of the document for a convenient overview of all required dependencies. I will point out some of the packages when we need them later.
@@ -73,11 +69,5 @@ In some of the tables, we will refer to the data source in the table's footnote 
 
 # Data source footnote
 folio_footnote <- "**Data source:** `vegetation` data from the `{folio}` package"
-```
-
-```{r}
-#| echo: false
-
-save(list = c("dat_vegetation", "folio_footnote"), file = "helpers/Global_objects.rds")
 ```
 
