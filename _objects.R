@@ -141,6 +141,3 @@ PlotHalfViolins <- function(data_to_plot) {
 
 # Clean up temporary objects
 rm(world_data, vegetation_countries, vegetation_continents)
-
-# Print message to confirm successful loading
-cat("✓ All shared objects created successfully from _objects.R\n")
