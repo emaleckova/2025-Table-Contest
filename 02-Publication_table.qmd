@@ -27,11 +27,15 @@ veg_summarized <- dat_vegetation |>
 Displaying a data frame as a `gt` table is a straightforward process and the default design is pleasing. However, our table will require some additional formatting to satisfy taxonomical and scietific conventions given by the data.
 
 ```{r}
-#| label: tbl-deafults
-#| code-fold: false
+#| label: minimal-gt-code
 
 tbl_plain <- veg_summarized |> 
     gt()
+```
+
+```{r}
+#| label: tbl-deafults
+#| echo: false
 
 tbl_plain
 ```
@@ -45,7 +49,7 @@ With `tab_style()` we can easily italicize an entire column and with `cols_label
 
 
 ```{r}
-#| label: tbl-publication
+#| label: code-tbl-publication
 
 tbl_formatted <- tbl_plain |>
     # this is only a helper column used for conditional formatting and it should not be displayed in the final table
@@ -75,8 +79,14 @@ tbl_formatted <- tbl_plain |>
              matches("country") ~ px(250),
              everything() ~ px(100))
 
+```
+
+```{r}
+#| label: tbl-publication
+
 tbl_formatted
 ```
+
 
 ## Custom theme
 
@@ -109,7 +119,7 @@ paper_gt_theme <- function(gt_table) {
 ```
 
 
-:::{.callout-warning}
+::: {.callout-warning}
 ## Custom theme placement
 
 The custom scheme contains formatting options for column spanners and the theme definition **must** thus come only once spanner were defined. In other case, they will remain unaffected by the custom theme.
@@ -132,7 +142,7 @@ We stored the previous table as a gt table and we will take advantage of it. We 
 We take advantage of `n_plants` "helper column" to grey out families with less than three measurements, with `tab_footnote()` we can easily provide more details about meaning of the formatting options.
 
 ```{r}
-#| label: tbl-publication-ready-conditional
+#| label: code-tbl-publication-ready-conditional
 
 tbl_publication_conditional <- tbl_formatted |>
   paper_gt_theme() |>
@@ -145,7 +155,13 @@ tbl_publication_conditional <- tbl_formatted |>
     ) |> 
   # conditional formatting was introduced and it should be explained - a table footnote is a good place to do so
   tab_footnote(footnote = md(paste(folio_footnote, "<br>", 
-                                   "Families which have less than three measurements are greyed out.")))
+                                   "Families which have less than three measurements are greyed out."))) |> 
+  tab_style(style = cell_text(align = "left"), locations = cells_footnotes())
+```
+
+
+```{r}
+#| label: tbl-publication-ready-conditional
 
 tbl_publication_conditional 
 ```
@@ -153,7 +169,7 @@ tbl_publication_conditional
 
 ## Default table processing by Quarto
 
-:::{.callout-tip}
+::: {.callout-tip}
 ## Table processing in Quarto
 
 Quarto, by default, applies a Bootstrap CSS class (`table-striped`) to tables generated from code chunks, which introduces row stripping in HTML tables. Row stripping is not common in publications and we thus turn it off in the code chunk below (with `html-table-processing: "none"`) to show how a final publication-ready table might look like.
