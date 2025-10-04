@@ -21,14 +21,12 @@ format:
   html:
     theme: cosmo
     embed-resources: true
-    code-fold: true
-    code-summary: "Show code"
     code-overflow: wrap
     
 toc: true
 toc-expand: true
 number-sections: true
 
+echo: true
 message: false
 warning: false
-echo: true
