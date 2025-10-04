@@ -35,7 +35,7 @@ library(openxlsx2)
 ```
 
 
-After loading the data, some preprocessing will be handy to avoid troubles and repetitive handling of the issues again and again. For example, in @sec-advanced-design we will draw in earth map data to visualize countries. It turnes out that the `{rnaturalearth}` packages which is a common source of geographical data refers to *Democratic Republic of the Congo*, while the authors of the original publication use older name *Zaire*. Besides making this fix, we will also introduce an abbreviated version of the current country's name to save some space in plot titles (also relevant in @sec-advanced-design). We will also introduce `C<sub>3</sub>` and `C<sub>4</sub>` in the `type` column to set us for a nicely formatted spelling throughout all tables.
+After loading the data, some preprocessing will be handy to avoid troubles and repetitive handling of the issues again and again. For example, in @sec-poster-design we will draw in earth map data to visualize countries. It turnes out that the `{rnaturalearth}` packages which is a common source of geographical data refers to *Democratic Republic of the Congo*, while the authors of the original publication use older name *Zaire*. Besides making this fix, we will also introduce an abbreviated version of the current country's name to save some space in plot titles (also relevant in @sec-poster-design). We will also introduce `C<sub>3</sub>` and `C<sub>4</sub>` in the `type` column to set us for a nicely formatted spelling throughout all tables.
 
 ```{r}
 #| label: load-data
