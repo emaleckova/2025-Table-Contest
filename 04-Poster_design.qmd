@@ -326,6 +326,8 @@ tbl_with_plots |>
   )
 ```
 
+## Advanced modifications with `CSS`
+
 This is not too bad - but what about setting a nice background colour and adjusting cell borders accordingly? With predefined arguments of `tab_options()` and a little bit of CSS, we can do a lot with relatively little of a code. Even a gradient background!
 
 ```{r}
