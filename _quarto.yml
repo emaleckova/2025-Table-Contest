@@ -22,7 +22,10 @@ format:
     theme: cosmo
     embed-resources: true
     code-overflow: wrap
-    
+    grid:
+      margin-width: 200px
+      body-width: 900px
+
 toc: true
 toc-expand: true
 number-sections: true

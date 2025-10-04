@@ -30,11 +30,12 @@ Displaying a data frame as a `gt` table is a straightforward process and the def
 #| label: minimal-gt-code
 
 tbl_plain <- veg_summarized |> 
-    gt()
+  gt() |> 
+  tab_options(table.width = px(800))
 ```
 
 ```{r}
-#| label: tbl-deafults
+#| label: tbl-minimal-code
 #| echo: false
 
 tbl_plain
@@ -72,19 +73,16 @@ tbl_formatted <- tbl_plain |>
         sd_d = "SD"
     ) |> 
     fmt_markdown(columns = c("type")) |> 
-    fmt_number(columns = c("mean_d", "sd_d"), decimals = 2) |> 
-    # basic formatting with the customized theme
-    # Note: order matters here - the custom theme defines formatting for column spanners and it must be used only after a (all) spanner(s) were created
-  cols_width(matches("family") ~ px(150),
-             matches("country") ~ px(250),
-             everything() ~ px(100))
-
+    fmt_number(columns = c("mean_d", "sd_d"), decimals = 2)
 ```
 
 ```{r}
 #| label: tbl-publication
+#| echo: false
 
-tbl_formatted
+tbl_formatted |>
+  tab_options(table.width = px(800)) |> 
+  cols_width(matches("country") ~ px(200))
 ```
 
 
@@ -129,7 +127,10 @@ The custom scheme contains formatting options for column spanners and the theme 
 #| label: tbl-publication-themed
 
 tbl_formatted |>
-  paper_gt_theme()
+  # Note: we intorduced column spanners earlier. It is important that the custom theme is used after a (all) spanner(s) were created because these are targeted by the theme
+  paper_gt_theme()|>
+  tab_options(table.width = px(800)) |> 
+  cols_width(matches("country") ~ px(200))
 ```
 
 
@@ -162,8 +163,11 @@ tbl_publication_conditional <- tbl_formatted |>
 
 ```{r}
 #| label: tbl-publication-ready-conditional
+#| echo: false
 
-tbl_publication_conditional 
+tbl_publication_conditional |>
+  tab_options(table.width = px(800)) |> 
+  cols_width(matches("country") ~ px(200))
 ```
 
 
@@ -178,8 +182,11 @@ Quarto, by default, applies a Bootstrap CSS class (`table-striped`) to tables ge
 ```{r}
 #| label: tbl-publication-ready-conditional-stripped
 #| html-table-processing: "none"
+#| echo: false
 
-tbl_publication_conditional 
+tbl_publication_conditional |>
+  tab_options(table.width = px(800)) |> 
+  cols_width(matches("country") ~ px(275))
 ```
 
 
