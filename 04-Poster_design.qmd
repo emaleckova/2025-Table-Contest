@@ -73,7 +73,7 @@ showtext_auto()
 It is a good idea to define the custom font before proceeding with generation of the tables and embedded figures. This will allow us to reference to it when we create these building blocks.
 :::
 
-## Plots as table's building blocks
+## Inlucding `{ggplot2}` plots in a `gt` table
 
 We will actually produce two figures for each country and plant type (either C~3~ or c ~4~) and as a next step, we will therefore prepare the code for both figures. Because we will use the `{gt}`'s `text_transform()` function to embed `ggplot2` figures into a table, we will wrap the plotting code into functions.
 
