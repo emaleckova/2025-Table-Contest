@@ -73,7 +73,7 @@ showtext_auto()
 It is a good idea to define the custom font before proceeding with generation of the tables and embedded figures. This will allow us to reference to it when we create these building blocks.
 :::
 
-## Inlucding `{ggplot2}` plots in a `gt` table
+## Including `{ggplot2}` plots in a `gt` table
 
 We will actually produce two figures for each country and plant type (either C~3~ or c ~4~) and as a next step, we will therefore prepare the code for both figures. Because we will use the `{gt}`'s `text_transform()` function to embed `ggplot2` figures into a table, we will wrap the plotting code into functions.
 
@@ -208,27 +208,7 @@ summarized_tbl_input |>
 ```
 
 
-`text_transform()` has done its job but the resulting table is not visually quite appealing. As we will work on improving it, we will first of all handle the "row groups". For most of the countries, there is only a single group of observations and we included country names in plot titles already. We can move row group labels to columns for a much nicer table
-
-```{r}
-#| label: tbl-poster-design-1
-#| html-table-processing: "none"
-
-summarized_tbl_input |> 
-  gt(
-    row_group_as_column = T,
-  ) |>
-  # country maps
-  text_transform(
-    locations = cells_row_groups(),
-    fn = function(x) {
-      lapply(x, function(y) {
-        html(PlotCountry(y) |> ggplot_image(height = px(150), aspect_ratio = 1))
-      })
-    }
-  )
-```
-
+`text_transform()` has done its job but the resulting table is not visually quite appealing. As we will work on improving it, we will first of all handle the "row groups". For most of the countries, there is only a single group of observations and we included country names in plot titles already. We can move row group labels to columns for a much nicer table.
 
 Luckily, the `gt()` has a `process_md` argument which makes handling of subscript a super easy task:
 
@@ -250,7 +230,8 @@ summarized_tbl_input |>
         html(PlotCountry(y) |> ggplot_image(height = px(150), aspect_ratio = 1))
       })
     }
-  )
+  ) |> 
+  tab_options(table.width = px(800))
 ```
 
 
@@ -258,8 +239,7 @@ Now, it's time to include the other figure, a combined jitter and half violin pl
 
 
 ```{r}
-#| label: tbl-poster-design-3
-#| html-table-processing: "none"
+#| label: code-tbl-poster-design-3
 
 tbl_with_plots <- summarized_tbl_input |> 
   # new column for violin + scatter plot assembly
@@ -298,8 +278,15 @@ tbl_with_plots <- summarized_tbl_input |>
       })
     }
   )
+```
 
-tbl_with_plots
+```{r}
+#| label: tbl-poster-design-3
+#| html-table-processing: "none"
+#| echo: false
+
+tbl_with_plots |> 
+  tab_options(table.width = px(800))
 ```
 
 
@@ -323,7 +310,8 @@ tbl_with_plots |>
       cell_text(align = "center")
     ),
     locations = cells_body(columns = everything())
-  )
+  ) |> 
+  tab_options(table.width = px(800))
 ```
 
 ## Advanced modifications with `CSS`
@@ -331,7 +319,7 @@ tbl_with_plots |>
 This is not too bad - but what about setting a nice background colour and adjusting cell borders accordingly? With predefined arguments of `tab_options()` and a little bit of CSS, we can do a lot with relatively little of a code. Even a gradient background!
 
 ```{r}
-#| label: tbl-poster-design-final
+#| label: code-tbl-poster-design-final
 
 tbl_with_plots_gradient <- summarized_tbl_input |> 
   mutate(violin_plot = "Violin") |> 
@@ -408,8 +396,13 @@ tbl_with_plots_gradient <- summarized_tbl_input |>
     #countries_tbl .gt_col_heading, #countries_tbl .gt_column_spanner_outer, #countries_tbl .gt_row.gt_center.gt_stub, #countries_tbl .gt_row.gt_center.gt_stub_row_group, #countries_tbl .gt_row.gt_left.gt_stub, #countries_tbl .gt_row.gt_left.gt_stub_row_group {
       background: transparent; border-right-style: none; vertical-align: middle;
     }")
+```
 
-tbl_with_plots_gradient
+```{r}
+#| label: tbl-poster-design-final
+
+tbl_with_plots_gradient |> 
+  tab_options(table.width = px(800))
 ```
 
 
@@ -422,7 +415,8 @@ tbl_with_plots_gradient |>
   tab_header(md("&delta;^13^C is a ratio between ^12^C and ^13^C isotopes; photosynthetically more efficient plant species show less negative values")) |> 
   tab_footnote(md(folio_footnote)) |> 
   tab_options(heading.title.font.size = 12,
-              footnotes.font.size = 12)
+              footnotes.font.size = 12) |> 
+  tab_options(table.width = px(800))
 ```
 
 
