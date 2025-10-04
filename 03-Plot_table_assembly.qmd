@@ -1,7 +1,3 @@
----
-
----
-
 ```{r}
 #| echo: false
 
@@ -14,7 +10,8 @@ source("_objects.R")
 
 When creating a series of outputs, it is desirable to keep them visually unified. Is it possible to combine plots and tables in a single figure? Yes, it is - including tables produced with the `{gt}` package. We will only need a small trick to convert a `gt` table to a _grob_, which we can then combine with a plot created with the famous `{ggplot2}` package.
 
-1. Make a plot
+**1. Make a plot**  
+
 Here, we will create a simple violin plot to visualize the distribution of measured δ^13^C across countries in this data set.
 
 ```{r}
@@ -32,19 +29,21 @@ p_violin <- ggplot(dat_vegetation, aes(x = country_label, y = delta)) +
     axis.ticks.y = element_line(colour = "black", linewidth = 0.75),
     axis.ticks.x = element_blank(),
     axis.text.x = element_blank(),
-    axis.text.y = element_text(colour = "black", size = 12),
+    axis.text.y = element_text(colour = "black", size = 17),
     axis.title = element_blank(),
     aspect.ratio = 0.75
   )
 ```
 
 ```{r}
+#| label: fig-violin
+#| fig-width: 4.5
 #| echo: false
 
 p_violin
 ```
 
-2. We will create a simple `gt` table
+**2. Make a `gt` table**
 
 ```{r}
 #| label: gt-for-figure
@@ -74,16 +73,15 @@ gt_for_plot <- dat_vegetation |>
 ```
 
 ```{r}
+#| label: tbl-gt-for-figure
 #| echo: false
 
 gt_for_plot
 ```
 
-3. We need to convert the `gt` table to a _grob_ (required by `{patchwork}`), which requires a few dependencies
+**3. Convert `gt` table to a _grob_ (required by `{patchwork}`), which requires new dependencies:**
 
 ```{r}
-#| echo: true
-
 library(magick)
 library(ggplotify)
 ```
@@ -91,6 +89,8 @@ library(ggplotify)
 With a small function, we can first save the `gt` table as an `PNG` image and with help of the `{ggplotify}`, further conversion into a _grob_ is possible:
 
 ```{r}
+#| fxn-gt-to-grob
+
 as_grob_gt <- function(x) {
   tmp <- tempfile(fileext = ".png")
   gtsave(x, filename = tmp)
@@ -101,13 +101,11 @@ as_grob_gt <- function(x) {
 }
 ```
 
-4. Assemble plot and table into a single figure
+**4. Assemble plot and table into a single figure**
 
 As mentioned above, we will use the `{patchwork}` package for a final plot-table assembly.
 
 ```{r}
-#| echo: true
-
 library(patchwork)
 ```
 
@@ -123,7 +121,9 @@ gt_grob_patchwork <- as_grob_gt(gt_for_plot)
 we can treat it as _e.g._, another `ggplot2` figure and with help of `{patchwork}`'s syntax, control relative positions of plot and table as well as their alignment
 
 ```{r}
-#| label: figure-assembly
+#| label: fig-assembly
+#| fig-width: 11
+#| fig-asp: 0.75
 
 p_violin / gt_grob_patchwork
 ```
