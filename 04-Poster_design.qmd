@@ -7,13 +7,15 @@ source("_objects.R")
 
 # Poster design {#sec-poster-design}
 
+## Introduction
+
 In other situations, we may be more creative with our table design. A well-done table can be as catchy as a figure and we can use it to get attention of our readers. In the course of this tutorial, we can think for example of a table for a scientific poster. The `vegetation` data contains details about countries where the δ^13^C measurements were done - highlighting the country's positions in continent shapes should be the eye catcher element of our table.
 
 While working on @tbl-publication-ready-conditional, we realized that there was a different number of measurements in different families. In this section, we will group our data to even smaller numbers of groups and we do not want to loose the detail about the number of underlying data points. We will use `ggplot_image()` to include a scatter plot (combined with half-violin plots to visualize the distribution of measured values even better).
 
 Besides combining table layout with `{ggplot2}` figures, we will pay attention to colours used in the various components of the table. In a real project, it may be for example organisation colours. Here, we will use a few colours from the `sPBIYlGn` palette from the `{Redmonder}` package.
 
-We will start be loading the `{rnaturalearth}` package which - among many other details about countries - contains assignment of countries to continents and polygons for countries' borders.
+We will start be loading the `{rnaturalearth}` package which - among many other details about countries - contains assignment of countries to continents and polygon shapes for countries' borders.
 
 ```{r}
 #| eval: true
@@ -21,7 +23,10 @@ We will start be loading the `{rnaturalearth}` package which - among many other 
 library(rnaturalearth)
 ```
 
+## Pre-processing
+
 Next, we will proceed with some pre-processing:  
+
   1. extract labels (used as plot titles) of countries of interest (those with measurement data) as a named vector - the names are critical to match country names from `dat_vegetation` (and data frames derived from it) with country polygons from `{rnaturalearth}` (here, loaded as `world_data`)  
   2. obtain countries data  
   3. and subset them only to countries from the `vegetation` data set  
@@ -68,7 +73,9 @@ showtext_auto()
 It is a good idea to define the custom font before proceeding with generation of the tables and embedded figures. This will allow us to reference to it when we create these building blocks.
 :::
 
-We will actually produce two figures for each country & plant type (either C~3~ or c ~4~) and as a next step, we will therefore prepare the code for both figures. Because we will use the `{gt}`'s `text_transform()` function to embed `ggplot2` figures into a table, we will wrap the plotting code into functions.
+## Plots as table's building blocks
+
+We will actually produce two figures for each country and plant type (either C~3~ or c ~4~) and as a next step, we will therefore prepare the code for both figures. Because we will use the `{gt}`'s `text_transform()` function to embed `ggplot2` figures into a table, we will wrap the plotting code into functions.
 
 **Country plots**
 
@@ -109,6 +116,7 @@ Let's give the function try with *Kenya* as an example:
 
 ```{r}
 #| fig-width: 2
+#| fig-align: center
 
 PlotCountry("Kenya")
 ```
@@ -160,9 +168,12 @@ Again, let's see how the output of this function looks like:
 
 ```{r}
 #| fig-width: 2
+#| fig-align: center
 
 PlotHalfViolins(dat_vegetation[dat_vegetation$country == "Kenya", ])
 ```
+
+## Putting it all together
 
 Let's start with a very basic table - with all required building blocks but not much of customized design.
 
