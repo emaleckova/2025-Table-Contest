@@ -1,0 +1,169 @@
+```{r}
+#| echo: false
+
+source("_setup.R")
+source("_objects.R")
+```
+
+# Gradient scale in column {#sec-table-column-fill}
+
+
+
+```{r}
+
+basic_table <- veg_summarized |>
+  filter(!is.na(sd_d)) |>
+  gt(process_md = T) |>
+  # replace default NA values with a "-"
+  # Note: modifying the data with {dplyr} functions would work equally well but {gt} has a devoted function for this purpose
+  sub_missing(columns = "sd_d", missing_text = "-") |>
+  tab_style(
+    style = list(
+      cell_text(style = "italic")
+    ),
+    # family names in italics
+    locations = cells_body(columns = "family")
+  ) |>
+  # ^13^ is markdown for superscript, &delta is html for lower case Greek delta
+  tab_spanner(columns = contains("_d"), label = md("&delta;^13^C")) |>
+  cols_label(
+    family = "Family",
+    country = "Country",
+    type = "Type",
+    n_plants = "Observations",
+    mean_d = "Mean",
+    sd_d = "SD"
+  ) |>
+  fmt_markdown(columns = c("type")) |>
+  fmt_number(columns = c("mean_d", "sd_d"), decimals = 2)
+```
+
+```{r}
+#| echo: false
+
+basic_table
+```
+
+
+There are many great resources related to colours and colour palettes (e.g., [Color Palette Finder](https://r-graph-gallery.com/color-palette-finder) by Yan Holtz, or NR XXXXXXXXXXXXXXXXX). For the sake of this tutorial, we will use HCL palettes from the `{grDevices}`. There are over 110 qualitative, sequentinal and diverging palettes in this collection. ([HCL-Based Color Palettes](https://colorspace.r-forge.r-project.org/articles/hcl_palettes.html)).
+
+
+## Continous variables
+
+```{r}
+#| warning: true
+
+preformat_tbl <- basic_table |> 
+  # per-column cell fill
+  data_color(n_plants,
+             method = "numeric",
+             palette = "BurgYl")
+```
+
+
+**Observation counts**
+
+```{r}
+preformat_tbl <- basic_table |> 
+  # per-column cell fill
+  data_color(n_plants,
+             method = "numeric",
+             palette = rev(hcl.colors(2, palette = "BurgYl")))
+```
+
+```{r}
+#| echo: false
+
+preformat_tbl
+```
+
+
+**Mean δ^13^C and SD**
+
+```{r}
+cont_table <- preformat_tbl |> 
+  data_color(c("mean_d", "sd_d"),
+             method = "numeric",
+             palette = "Greens")
+```
+
+
+```{r}
+#| echo: false
+
+cont_table
+```
+
+
+## Discrete variables
+
+```{r}
+basic_table |> 
+  data_color(c("type"),
+             method = "factor",
+             palette = c("#FDC718FF", "#3E938BFF"))
+```
+
+## Including a legend
+
+Make dummy plot
+
+```{r}
+dummy_df <- data.frame(x = c("A", "B", "C"),
+                       y = c(1, 2, 3),
+                       fill_value = c(1, 50, 100))
+
+dummy_plot <- ggplot(dummy_df, aes(x = x, y = y)) +
+  geom_tile(aes(fill = fill_value)) +
+  scale_fill_gradientn(colors = rev(hcl.colors(2, "Greens")),
+                       breaks = c(1, 100), labels = c("min", "max")) +
+  theme(legend.position = "bottom",
+        legend.title = element_blank(),
+        legend.ticks = element_blank())
+
+dummy_plot
+```
+and export only legend `{ggpubr}`
+
+```{r}
+library(ggpubr)
+```
+
+
+```{r}
+fill_legend <- as_ggplot(get_legend(dummy_plot))
+```
+
+
+```{r}
+dummy_fxn <- function(){
+  dummy_plot <- ggplot(dummy_df, aes(x = x, y = y)) +
+    geom_tile(aes(fill = fill_value)) +
+    scale_fill_gradientn(colors = rev(hcl.colors(2, "Greens")),
+                         breaks = c(1, 100), labels = c("min", "max")) +
+    theme(legend.position = "bottom",
+          legend.title = element_blank(),
+          legend.ticks = element_blank(),
+          legend.margin = margin(0, 0, 0, 0),
+          legend.key.height = unit(120, "pt"),
+          legend.key.width = unit(225, "pt"),
+          legend.text = element_text(size = 70),
+          plot.margin = margin(0, 0, 0, 0))
+  
+  fill_legend <- as_ggplot(get_legend(dummy_plot))
+  
+  return(fill_legend)
+}
+```
+
+
+```{r}
+cont_table |> 
+  tab_footnote(footnote = html(glue::glue(
+      "<div style='float: left; top: 100%; bottom: 0%; transform: translate(0%, -105); margin-left: -15%;'>
+         {dummy_fxn() |> ggplot_image(height = 50, aspect_ratio = 6)}
+       </div>"
+    )))
+```
+
+
