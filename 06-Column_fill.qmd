@@ -1,0 +1,326 @@
+---
+html-table-processing: "none"
+---
+
+```{r}
+#| echo: false
+
+source("_setup.R")
+source("_objects.R")
+```
+
+```{r}
+#| label: gt-publication-theme-2
+#| echo: false
+
+paper_gt_theme <- function(gt_table) {
+  gt_table |> 
+    # overall aspects such as font and padding
+    tab_options(
+      table.font.names = "Times New Roman",
+      data_row.padding = px(6),
+      heading.align = "center",
+      heading.title.font.size = px(26),
+      heading.subtitle.font.size = px(14),
+      table_body.hlines.width = px(0)
+    ) |> 
+    # column labels and spanners in bold font face
+    tab_style(
+        style = cell_text(weight = "bold"),
+        locations = cells_column_labels(everything())
+    ) |> 
+    tab_style(
+        style = cell_text(weight = "bold"),
+        locations = cells_column_spanners(spanners = everything())
+    )      
+}
+```
+
+# Gradient fill in columns {#sec-table-column-fill}
+
+In @sec-conditional-rows, we used conditionally formatting to include information about number of observations behind δ^13^C values in the table (@tbl-publication-ready-conditional). We can very easily go further than this and use cell fill colour to draw attention to range of values in a column (@sec-continous-vars) or to differentiate among discrete variables (@sec-discrete-vars).
+
+We will start by recreating a "basic" table with polished column labels and spanner. We will subset the summarized data (`veg_summarized`) a bit, mainly to avoid a too long table - we will drop all plant families with less than three observations.
+
+```{r}
+basic_table <- veg_summarized |>
+  # rows with non-NA SD values have at least three observations
+  filter(!is.na(sd_d)) |>
+  gt(process_md = T) |>
+  # replace default NA values with a "-"
+  # Note: modifying the data with {dplyr} functions would work equally well but {gt} has a devoted function for this purpose
+  sub_missing(columns = "sd_d", missing_text = "-") |>
+  tab_style(
+    style = list(
+      cell_text(style = "italic")
+    ),
+    # family names in italics
+    locations = cells_body(columns = "family")
+  ) |>
+  # ^13^ is markdown for superscript, &delta is html for lower case Greek delta
+  tab_spanner(columns = contains("_d"), label = md("&delta;^13^C")) |>
+  cols_label(
+    family = "Family",
+    country = "Country",
+    type = "Type",
+    n_plants = "Observations",
+    mean_d = "Mean",
+    sd_d = "SD"
+  ) |>
+  fmt_markdown(columns = c("type")) |>
+  fmt_number(columns = c("mean_d", "sd_d"), decimals = 2) |> 
+  # among others bold column and spanner labels
+  paper_gt_theme() |> 
+  tab_options(table.width = px(800)) |> 
+  cols_width(matches("country") ~ px(275))
+```
+
+```{r}
+#| echo: false
+
+basic_table
+```
+
+
+There are many great resources related to colours and colour palettes (e.g., [Color Palette Finder](https://r-graph-gallery.com/color-palette-finder) by Yan Holtz, or a recent [blog](https://nrennie.rbind.io/blog/colours-in-r/) by Nicola Rennie). For the sake of this tutorial, we will use HCL palettes from the `{grDevices}`. There are over 110 qualitative, sequentinal and diverging palettes in this collection. ([HCL-Based Color Palettes](https://colorspace.r-forge.r-project.org/articles/hcl_palettes.html)) which makes it a great starting point.
+
+
+## Continous variables {#sec-continous-vars}
+
+**Mean δ^13^C and SD**
+
+With use `data_color()` function from the `{gt}` package as below. `data_color()` applies provided colour pallette to individual colours and it is therefore safe to provide multiple columns at once.
+
+```{r}
+preformat_table <- basic_table |> 
+  data_color(columns = c("mean_d", "sd_d"),
+             method = "numeric",
+             palette = "Greens")
+```
+
+
+```{r}
+#| echo: false
+
+preformat_table
+```
+
+The process was straightforward with the first selected palette `Greens`, which is a `ColorBrewer` palette.
+
+**Observation counts**
+
+We will use a red-ish, HCL pallette for values in the column with number of observations: `BurgYl`.
+
+```{r}
+#| warning: true
+#| error: true
+
+preformat_table |> 
+  # per-column cell fill
+  data_color(columns = "n_plants",
+             method = "numeric",
+             palette = "BurgYl")
+```
+
+However, this time the palette's colour are not accepted right away. The reason seems to be that the `BurgYl` palette does not come from `ColorBrewer` (but from `rcartocolor`). With the `hcl.colors()` function, we can easily generate HEX codes for any number of colours from a specific column:
+
+```{r}
+#| results: true
+
+hcl.colors(n = 2, palette = "BurgYl")
+```
+*I decided to set `n` to 2 to pick the colour from each end of the palette and let `data_color()` to the rest when filling cell backgrounds.*
+
+In the "Mean" and "SD" column, the darkest tone is used for highest values. For consitency in the "Observations" column, we can simply reverse the order of the obtained colous.
+
+```{r}
+final_table <- preformat_table |> 
+  # per-column cell fill
+  data_color(columns = "n_plants",
+             method = "numeric",
+             # light to dark for min to max
+             palette = rev(hcl.colors(2, palette = "BurgYl")))
+```
+
+```{r}
+#| label: tbl-gradient-final
+#| echo: false
+
+final_table
+```
+
+
+## Discrete variables {#sec-discrete-vars}
+
+For dicrete variables (factors), the `data_color()` function works very similarly, we only need to set `method` to `factor`:
+
+```{r}
+basic_table |> 
+  data_color(c("type"),
+             method = "factor",
+             palette = c("#FDC718FF", "#3E938BFF"))
+```
+
+
+## Including a legend
+
+I have created a couple of tables with gradient fill for my colleagues lately and it turned out to be confusing to identify the gradient's direction for some of them. Thus, I am using this tutorial as an opportunity to find a way how to include a little legend in a table. It is indeed possible and requires only a few steps to create a legend as a ggplot object. Unlike with plots in @sec-poster-design, controlling exact placement became an issue, which I could solve only with a bit of `CSS`.
+
+First, we will create a dummy plot, which will be the source for our legend.
+
+```{r}
+dummy_df <- data.frame(x = c("A", "B", "C"),
+                       y = c(1, 2, 3),
+                       fill_value = c(1, 50, 100))
+
+dummy_plot <- ggplot(dummy_df, aes(x = x, y = y)) +
+  geom_tile(aes(fill = fill_value)) +
+  scale_fill_gradientn(colors = rev(hcl.colors(2, "Greens")),
+                       breaks = c(1, 100), labels = c("min", "max")) +
+  theme(legend.position = "bottom",
+        legend.title = element_blank(),
+        legend.ticks = element_blank())
+
+dummy_plot
+```
+From there, we can continue with isolating the legend only and converting it into a ggplot object. There are couple of options to do so. Here, we will use functions from the `{ggpubr}` package.
+
+```{r}
+library(ggpubr)
+```
+
+
+```{r}
+#| fig-height: 1
+as_ggplot(get_legend(dummy_plot))
+```
+
+In @sec-poster-design, the `text_transfrom()` function (`{gt}`) was introduced already. We can use it to replace a (placeholder) text with a ggplot object - here, our legend. For that, we need to wrap the code for legend isolation into a devoted function.
+
+```{r}
+#| label: legend-fxn
+
+MakeLegend <- function(dummy_df){
+  dummy_plot <- ggplot(dummy_df, aes(x = x, y = y)) +
+    geom_tile(aes(fill = fill_value)) +
+    scale_fill_gradientn(colors = rev(hcl.colors(2, "Greens")),
+                         breaks = c(1, 100), labels = c("min", "max")) +
+    theme(legend.position = "bottom",
+          legend.title = element_blank(),
+          legend.ticks = element_blank(),
+          legend.margin = margin(0, 0, 0, 0),
+          legend.key.height = unit(120, "pt"),
+          legend.key.width = unit(225, "pt"),
+          legend.text = element_text(size = 70),
+          plot.margin = margin(0, 0, 0, 0))
+  
+  fill_legend <- as_ggplot(get_legend(dummy_plot))
+  
+  return(fill_legend)
+}
+```
+
+The most naive approach is to call the `MakeLegend()` function and pass its output to `ggplot_image()` as we have done in @sec-poster-design. It turns out our function did create an output but is an `HTML` string.
+
+```{r}
+#| label: tbl-footnote-legend-simple
+
+final_table |> 
+  tab_footnote(footnote = MakeLegend(dummy_df) |> ggplot_image(height = 50, aspect_ratio = 6))
+```
+
+If we wrap `MakeLegend(dummy_df) |> ggplot_image(height = 50, aspect_ratio = 6)` into an `html()` function, the generated ggplot object is finally displayed correctly.
+
+```{r}
+#| label: tbl-footnote-legend-html
+
+final_table |> 
+  tab_footnote(footnote = html(MakeLegend(dummy_df) |> ggplot_image(height = 50, aspect_ratio = 6)))
+```
+
+It is a decent outcome, but the legend's positioning is not perfect. Can we move it more to the left and reduce the footnote's height a bit? The only solution I could find was wrapping our call into an `HTML` division. With this setup, we can then use `CSS` options to control position of the element. Finding out a suuitable set of settings was a trial and error of various alignment options (great source was [W3Schools's CSS section](https://www.w3schools.com/css/css_align.asp)).
+
+We are combining `HTML` and `CSS` syntax with `R` code (`MakeLegend(dummy_df) |> ggplot_image(height = 50, aspect_ratio = 6)`) and we need to make sure that it gets interpreted correctly. We will use the `{glue}` package. Its `glue()` function is very straightforward to use: we only need to wrap `R` code into a pair of curly braces (`{ }`).
+
+```{r}
+#| label: tbl-footnote-legend-css
+
+final_table |> 
+  tab_footnote(footnote = html(glue::glue(
+      "<div style='float: left; top: 100%; bottom: 0%; transform: translate(0, -105); margin-left: -10%;'>
+         {MakeLegend(dummy_df) |> ggplot_image(height = 50, aspect_ratio = 6)}
+       </div>"
+    )))
+```
+
+
+### Composite legend
+
+In my opinion, the colour scale in the "Observations" column in easy to navigate even without legend because of integer values and their good separation. Nonetheless, we can use the second colour gradient as an opportunity to combine two ggplot objects in a single figure to be used in the gt table's footnote.
+
+We will modify the `MakeLegend()` function. It should produced two dummy plots, extract each of the legends and combine them side-by-side. We will introduce two new parameters to the new function - `gradient1` and `gradient2` - which will take a vector of colours used to create a gradient fill.
+
+```{r}
+#| label: fxn-legened-combined
+
+library(patchwork)
+
+MakeLegendCombined <- function(dummy_df, gradient1, gradient2) {
+  p1 <- dummy_plot <- ggplot(dummy_df, aes(x = x, y = y)) +
+    geom_tile(aes(fill = fill_value)) +
+    scale_fill_gradientn(
+      colors = gradient1,
+      breaks = c(1, 100), labels = c("min", "max")
+    ) +
+    theme(
+      legend.position = "bottom",
+      legend.title = element_blank(),
+      legend.ticks = element_blank(),
+      legend.margin = margin(0, 0, 0, 0),
+      legend.key.height = unit(120, "pt"),
+      legend.key.width = unit(225, "pt"),
+      legend.text = element_text(size = 70),
+      plot.margin = margin(0, 0, 0, 0)
+    )
+
+  fill_legend1 <- as_ggplot(get_legend(dummy_plot))
+
+  p2 <- dummy_plot <- ggplot(dummy_df, aes(x = x, y = y)) +
+    geom_tile(aes(fill = fill_value)) +
+    scale_fill_gradientn(
+      colors = gradient2,
+      breaks = c(1, 100), labels = c("min", "max")
+    ) +
+    theme(
+      legend.position = "bottom",
+      legend.title = element_blank(),
+      legend.ticks = element_blank(),
+      legend.margin = margin(0, 0, 0, 0),
+      legend.key.height = unit(120, "pt"),
+      legend.key.width = unit(225, "pt"),
+      legend.text = element_text(size = 70),
+      plot.margin = margin(0, 0, 0, 0)
+    )
+
+  fill_legend2 <- as_ggplot(get_legend(dummy_plot))
+  
+  # {patchwork} syntax to combine plots side by side
+  combined_legend <- fill_legend1 + fill_legend2
+
+  return(combined_legend)
+}
+```
+
+```{r}
+#| label: tbl-footnote-two-legends-css
+
+final_table |> 
+  tab_footnote(footnote = html(glue::glue(
+      "<div style='float: left; top: 100%; bottom: 0%; transform: translate(0, -105); margin-left: 0'>
+      {MakeLegendCombined(dummy_df,
+      gradient1 = rev(hcl.colors(2, 'Greens')),
+      gradient2 = rev(hcl.colors(2, 'BurgYl'))) |>
+        ggplot_image(height = 50, aspect_ratio = 8)}
+       </div>"
+    )))
+```

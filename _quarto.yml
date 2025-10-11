@@ -12,8 +12,9 @@ book:
     - 03-Plot_table_assembly.qmd
     - 04-Poster_design.qmd
     - 05-Interactivate_table.qmd
-    - 06-Appendix.qmd
-    - 07-Resources.qmd
+    - 06-Column_fill.qmd
+    - 07-Appendix.qmd
+    - 08-Resources.qmd
 
 number-depth: 2
 
