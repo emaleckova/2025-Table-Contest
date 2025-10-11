@@ -115,7 +115,7 @@ PlotCountry <- function(target_country) {
 Let's give the function try with *Kenya* as an example:
 
 ```{r}
-#| fig-width: 2
+#| fig-height: 2
 #| fig-align: center
 
 PlotCountry("Kenya")
@@ -326,6 +326,7 @@ tbl_with_plots_gradient <- summarized_tbl_input |>
   gt(
     id = "countries_tbl",
     rowname_col = "type",
+    groupname_col = "country",
     row_group_as_column = T,
     process_md = T
   ) |> 
@@ -395,6 +396,21 @@ tbl_with_plots_gradient <- summarized_tbl_input |>
     
     #countries_tbl .gt_col_heading, #countries_tbl .gt_column_spanner_outer, #countries_tbl .gt_row.gt_center.gt_stub, #countries_tbl .gt_row.gt_center.gt_stub_row_group, #countries_tbl .gt_row.gt_left.gt_stub, #countries_tbl .gt_row.gt_left.gt_stub_row_group {
       background: transparent; border-right-style: none; vertical-align: middle;
+    }
+    
+    /* Make all table body cells transparent to show gradient */
+    #countries_tbl .gt_table tbody tr {
+      background: transparent !important;
+    }
+    
+    #countries_tbl .gt_table tbody td {
+      background: transparent !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+    }
+    
+    /* Remove border from last row of each group for seamless effect */
+    #countries_tbl .gt_table tbody tr:last-child td {
+      border-bottom: none !important;
     }")
 ```
 

@@ -23,6 +23,7 @@ library(showtext)
 library(see) # half-violin plots
 library(ggiraph)
 library(htmltools)
+library(ggpubr)
 
 # plot-table assembly
 library(magick)
