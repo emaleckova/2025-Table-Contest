@@ -227,6 +227,8 @@ summarized_tbl_input |>
     locations = cells_body(columns = everything())
   ) |>
   tab_options(
+    heading.title.font.size = 12,
+    footnotes.font.size = 12,
     table.width = px(800),
     heading.align = "center",
     column_labels.border.top.color = "white",
@@ -239,7 +241,8 @@ summarized_tbl_input |>
   ) |>
   cols_width(
     type ~ px(100),
-    mean_d ~ px(100)
+    mean_d ~ px(100),
+    violin_plot ~ px(120)
   ) |> 
   # custom font to all parts of the table
   opt_table_font(font = list(google_font(name = "Open Sans"))) |> 
@@ -250,6 +253,11 @@ summarized_tbl_input |>
     
     #countries_tbl .gt_col_heading, #countries_tbl .gt_column_spanner_outer, #countries_tbl .gt_row.gt_center.gt_stub, #countries_tbl .gt_row.gt_center.gt_stub_row_group, #countries_tbl .gt_row.gt_left.gt_stub_row_group {
       background: transparent; border-right-style: none; vertical-align: middle;
+    }
+    
+    /* Control size of embedded ggiraph plots */
+    #countries_tbl .htmlwidget {
+      height: 180px !important;
     }") |> 
   tab_footnote(md(folio_footnote)) |> 
   tab_style(style = cell_text(align = "left"), locations = cells_footnotes())
