@@ -1,6 +1,8 @@
-::: {.callout-note}
-## The Table Contest
+---
+format: html
+---
 
+:::{.callout-note title="The Table Contest"}
 **The Table Contest** by Posit is an annual event and this book is a tutorial contribution for the 2025 edition.
 :::
 
