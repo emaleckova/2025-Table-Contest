@@ -38,7 +38,7 @@ paper_gt_theme <- function(gt_table) {
 
 # Gradient fill in columns {#sec-table-column-fill}
 
-In @sec-conditional-rows, we used conditionally formatting to include information about number of observations behind δ^13^C values in the table (@tbl-publication-ready-conditional). We can very easily go further than this and use cell fill colour to draw attention to range of values in a column (@sec-continous-vars) or to differentiate among discrete variables (@sec-discrete-vars).
+In @sec-conditional-rows, we used conditionally formatting to include information about number of observations behind δ^13^C values in the table (@tbl-publication-ready-rows). We can very easily go further than this and use cell fill colour to draw attention to range of values in a column (@sec-continous-vars) or to differentiate among discrete variables (@sec-discrete-vars).
 
 We will start by recreating a "basic" table with polished column labels and spanner. We will subset the summarized data (`veg_summarized`) a bit, mainly to avoid a too long table - we will drop all plant families with less than three observations.
 
