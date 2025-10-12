@@ -61,6 +61,8 @@ gt_for_plot <- dat_vegetation |>
     mean_d = "Mean",
     median_d = "Median"
   ) |>
+  # decimal places control
+  fmt_number(columns = contains("_d"), decimals = 2) |> 
   # column labels and spanners in bold font face
   tab_style(
     style = cell_text(weight = "bold"),
