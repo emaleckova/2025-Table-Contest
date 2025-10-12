@@ -146,6 +146,7 @@ PlotHalfViolins <- function(data_to_plot) {
     coord_cartesian(ylim = c(y_min, y_max)) +
     theme_classic() +
     theme(
+      text = element_text(family = "open sans"),
       plot.margin = margin(0, 0, 0, 0),
       plot.background = element_blank(),
       panel.background = element_blank(),
@@ -290,7 +291,7 @@ tbl_with_plots |>
 ```
 
 
-With that, our table's content is complete and we can try to improve it's overall design. There is a lot to do: nicer column labels (`cols_label()`) and formatting of numerical values (`fmt_number()`), alignment of column headers (`cols_align()`) and cell content (`tab_style()` targeting `cell_text()`)
+With that, our table's content is complete and we can try to improve it's overall design. There is a lot to do: nicer column labels (`cols_label()`) and formatting of numerical values (`fmt_number()`), alignment of column headers (`cols_align()`) and cell content (`tab_style()` targeting `cell_text()`). We also make sure that the table text and plot title use the same font family (`table.font.names` parameter of `tab_options()`).
 
 ```{r}
 #| label: tbl-poster-design-4
@@ -311,12 +312,24 @@ tbl_with_plots |>
     ),
     locations = cells_body(columns = everything())
   ) |> 
-  tab_options(table.width = px(800))
+  tab_options(table.width = px(800),
+              table.font.names = "open sans")
 ```
 
 ## Advanced modifications with `CSS`
 
-This is not too bad - but what about setting a nice background colour and adjusting cell borders accordingly? With predefined arguments of `tab_options()` and a little bit of CSS, we can do a lot with relatively little of a code. Even a gradient background!
+This is not too bad - but what about setting a nice background colour and adjusting cell borders accordingly? With predefined arguments of `tab_options()` and a little bit of CSS, we can do a lot with relatively little of a code. Even a gradient background! Albert Rapp has done a great job in explaining the `CSS` part in his [tutorial](https://gt.albert-rapp.de/styling#sec-custom-css) and I will thus refer you to this source. Here, I will only highlight the importance of setting an `id` to our gt table like this:
+
+```{r}
+#| eval: false
+
+summarized_tbl_input |> 
+  gt(
+    id = "countries_tbl")
+```
+
+
+With a valid ID, we can later refer to a particular table in our `opt_css()` call.
 
 ```{r}
 #| label: code-tbl-poster-design-final
