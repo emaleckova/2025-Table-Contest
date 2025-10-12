@@ -291,7 +291,7 @@ tbl_with_plots |>
 ```
 
 
-With that, our table's content is complete and we can try to improve it's overall design. There is a lot to do: nicer column labels (`cols_label()`) and formatting of numerical values (`fmt_number()`), alignment of column headers (`cols_align()`) and cell content (`tab_style()` targeting `cell_text()`). We also make sure that the table text and plot title use the same font family (`table.font.names` parameter of `tab_options()`).
+With that, our table's content is complete and we can try to improve it's overall design. There is a lot to do: nicer column labels (`cols_label()`) and formatting of numerical values (`fmt_number()`), alignment of column headers (`cols_align()`) and cell content (`tab_style()` targeting `cell_text()`). We also make sure that the table text and plot title use the same font family - to apply a selected font to an entire table, we will use the `opt_table_font()` function.
 
 ```{r}
 #| label: tbl-poster-design-4
@@ -312,8 +312,8 @@ tbl_with_plots |>
     ),
     locations = cells_body(columns = everything())
   ) |> 
-  tab_options(table.width = px(800),
-              table.font.names = "open sans")
+  opt_table_font(font = list(google_font(name = "Open Sans"))) |> 
+  tab_options(table.width = px(800))
 ```
 
 ## Advanced modifications with `CSS`
@@ -386,6 +386,7 @@ tbl_with_plots_gradient <- summarized_tbl_input |>
     ),
     locations = cells_body(columns = everything())
   ) |> 
+  opt_table_font(font = list(google_font(name = "Open Sans"))) |> 
   tab_options(
     table.width = px(600),
     table.font.names = "open sans",
@@ -429,6 +430,8 @@ tbl_with_plots_gradient <- summarized_tbl_input |>
 
 ```{r}
 #| label: tbl-poster-design-final
+#| html-table-processing: "none"
+#| tbl-cap: ""
 
 tbl_with_plots_gradient |> 
   tab_options(table.width = px(800))
@@ -439,13 +442,16 @@ In case we would use the table as a stand-alone graphic, it is a good idea to in
 
 ```{r}
 #| label: tbl-advanced-design-annotated
+#| html-table-processing: "none"
+#| tbl-cap: ""
 
 tbl_with_plots_gradient |> 
   tab_header(md("&delta;^13^C is a ratio between ^12^C and ^13^C isotopes; photosynthetically more efficient plant species show less negative values")) |> 
   tab_footnote(md(folio_footnote)) |> 
+  tab_style(style = cell_text(align = "left"), locations = cells_footnotes()) |> 
   tab_options(heading.title.font.size = 12,
-              footnotes.font.size = 12) |> 
-  tab_options(table.width = px(800))
+              footnotes.font.size = 12,
+              table.width = px(800))
 ```
 
 
