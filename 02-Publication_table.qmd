@@ -183,7 +183,8 @@ tbl_publication_conditional <- tbl_formatted |>
 
 
 ```{r}
-#| label: tbl-publication-ready-conditional
+#| label: tbl-publication-ready-rows
+#| tbl-cap: ""
 #| echo: false
 
 tbl_publication_conditional |>
@@ -202,6 +203,7 @@ Quarto, by default, applies a Bootstrap CSS class (`table-striped`) to tables ge
 
 ```{r}
 #| label: tbl-publication-ready-conditional-stripped
+#| tbl-cap: ""
 #| html-table-processing: "none"
 #| echo: false
 
