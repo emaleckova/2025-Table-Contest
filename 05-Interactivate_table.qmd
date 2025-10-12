@@ -245,20 +245,13 @@ summarized_tbl_input |>
   opt_table_font(font = list(google_font(name = "Open Sans"))) |> 
   opt_css(css ="
     #countries_tbl .gt_table {
-      background: linear-gradient(180deg, #3F7F68, #DBD797);
+      background: linear-gradient(180deg, #7DA37BFF, #DBD797);
     }
     
-    #countries_tbl .gt_col_heading, #countries_tbl .gt_column_spanner_outer, #countries_tbl .gt_row.gt_center, #countries_tbl .gt_row.gt_center.gt_stub_row_group, #countries_tbl .gt_row.gt_left.gt_stub, #countries_tbl .gt_row.gt_left.gt_stub_row_group {
+    #countries_tbl .gt_col_heading, #countries_tbl .gt_column_spanner_outer, #countries_tbl .gt_row.gt_center.gt_stub, #countries_tbl .gt_row.gt_center.gt_stub_row_group, #countries_tbl .gt_row.gt_left.gt_stub_row_group {
       background: transparent; border-right-style: none; vertical-align: middle;
-    }
-    
-    #countries-tbl .girafe_container, #countries-tbl .girafe_container_std, #countries_tbl .ggiraph-svg, #countries-tbl .ggiraph-svg-bg {
-      background: transparent;
-    }
-    
-    #countries-tbl .gt_row_group_first{
-      background: transparent;
-    }") |>
-  tab_footnote(md(folio_footnote))
+    }") |> 
+  tab_footnote(md(folio_footnote)) |> 
+  tab_style(style = cell_text(align = "left"), locations = cells_footnotes())
 ```
 

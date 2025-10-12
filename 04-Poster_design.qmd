@@ -11,7 +11,7 @@ source("_objects.R")
 
 In other situations, we may be more creative with our table design. A well-done table can be as catchy as a figure and we can use it to get attention of our readers. In the course of this tutorial, we can think for example of a table for a scientific poster. The `vegetation` data contains details about countries where the δ^13^C measurements were done - highlighting the country's positions in continent shapes should be the eye catcher element of our table.
 
-While working on @tbl-publication-ready-conditional, we realized that there was a different number of measurements in different families. In this section, we will group our data to even smaller numbers of groups and we do not want to loose the detail about the number of underlying data points. We will use `ggplot_image()` to include a scatter plot (combined with half-violin plots to visualize the distribution of measured values even better).
+While working on @tbl-publication-ready-rows, we realized that there was a different number of measurements in different families. In this section, we will group our data to even smaller numbers of groups and we do not want to loose the detail about the number of underlying data points. We will use `ggplot_image()` to include a scatter plot (combined with half-violin plots to visualize the distribution of measured values even better).
 
 Besides combining table layout with `{ggplot2}` figures, we will pay attention to colours used in the various components of the table. In a real project, it may be for example organisation colours. Here, we will use a few colours from the `sPBIYlGn` palette from the `{Redmonder}` package.
 
@@ -397,6 +397,8 @@ tbl_with_plots_gradient <- summarized_tbl_input |>
     table_body.border.top.color = "white",
     table_body.border.bottom.color = "white",
     table_body.hlines.color = "white",
+    row_group.border.top.color = "white",
+    row_group.border.bottom.color = "white",
     footnotes.border.bottom.color = "white"
   ) |>
   cols_width(
@@ -408,23 +410,8 @@ tbl_with_plots_gradient <- summarized_tbl_input |>
       background: linear-gradient(180deg, #7DA37BFF, #DBD797);
     }
     
-    #countries_tbl .gt_col_heading, #countries_tbl .gt_column_spanner_outer, #countries_tbl .gt_row.gt_center.gt_stub, #countries_tbl .gt_row.gt_center.gt_stub_row_group, #countries_tbl .gt_row.gt_left.gt_stub, #countries_tbl .gt_row.gt_left.gt_stub_row_group {
+    #countries_tbl .gt_col_heading, #countries_tbl .gt_column_spanner_outer, #countries_tbl .gt_row.gt_center.gt_stub, #countries_tbl .gt_row.gt_center.gt_stub_row_group, #countries_tbl .gt_row.gt_left.gt_stub_row_group {
       background: transparent; border-right-style: none; vertical-align: middle;
-    }
-    
-    /* Make all table body cells transparent to show gradient */
-    #countries_tbl .gt_table tbody tr {
-      background: transparent !important;
-    }
-    
-    #countries_tbl .gt_table tbody td {
-      background: transparent !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
-    }
-    
-    /* Remove border from last row of each group for seamless effect */
-    #countries_tbl .gt_table tbody tr:last-child td {
-      border-bottom: none !important;
     }")
 ```
 
