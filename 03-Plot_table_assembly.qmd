@@ -19,18 +19,18 @@ Here, we will create a simple violin plot to visualize the distribution of measu
 
 p_violin <- ggplot(dat_vegetation, aes(x = country_label, y = delta)) +
   geom_violin(colour = "black", fill = "#005C55FF") +
+  labs(x = "",
+       y = expression(delta ^13 ~ C)) +
   theme_classic() +
   theme(
     plot.margin = margin(0, 0, 0, 0),
     plot.background = element_blank(),
     panel.background = element_blank(),
-    axis.line.x = element_blank(),
-    axis.line.y = element_line(colour = "black", linewidth = 0.75),
+    axis.line = element_line(colour = "black", linewidth = 0.75),
     axis.ticks.y = element_line(colour = "black", linewidth = 0.75),
     axis.ticks.x = element_blank(),
-    axis.text.x = element_blank(),
-    axis.text.y = element_text(colour = "black", size = 17),
-    axis.title = element_blank(),
+    axis.text = element_text(colour = "black", size = 12),
+    axis.title = element_text(colour = "black", size = 13),
     aspect.ratio = 0.75
   )
 ```
@@ -71,7 +71,8 @@ gt_for_plot <- dat_vegetation |>
   tab_style(
     style = cell_text(weight = "bold"),
     locations = cells_column_spanners(spanners = everything())
-  )
+  ) |> 
+  tab_options(table.font.size = 11)
 ```
 
 ```{r}
