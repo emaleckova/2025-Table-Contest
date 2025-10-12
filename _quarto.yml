@@ -5,6 +5,8 @@ book:
   title: "{gt} tables for scientific projects"
   author: "Eva Maleckova"
   date: "Oct 02 2025"
+  repo-url: "https://github.com/emaleckova/2025-Table-Contest"
+  repo-actions: ["source", "issue"]
   chapters:
     - index.qmd
     - 01-Getting_started.qmd
@@ -16,7 +18,7 @@ book:
     - 07-Appendix.qmd
     - 08-Resources.qmd
 
-number-depth: 2
+number-depth: 3
 
 format:
   html:
@@ -29,6 +31,7 @@ format:
 
 toc: true
 toc-expand: true
+toc-depth: 3
 number-sections: true
 
 echo: true
