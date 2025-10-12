@@ -76,6 +76,27 @@ tbl_formatted <- tbl_plain |>
     fmt_number(columns = c("mean_d", "sd_d"), decimals = 2)
 ```
 
+:::{.callout-tip}
+## Providing columns to formatting functions
+
+The `{gt}` packages comes with a number of very useful functions to control formatting of common data types, such as `fmt_number()`, `fmt_percent()`, `fmt_datetime()` and many more. Another useful function is to allow markdown in specified columns: `fmt_markdown()`.  These are most effectively combined with `{tidyverse}` search terms such as `contains()`, `matches()`, `starts_with()`  or `ends_with()`.
+
+In the code chunk above, instead of providing full column names
+
+`fmt_number(columns = c("mean_d", "sd_d"), decimals = 2)`
+
+we can achieve the same outcome with:
+
+```{r}
+#| eval: false
+
+# previous code
+    fmt_markdown(columns = c("type")) |> 
+    fmt_number(columns = ends_with("_d"), decimals = 2)
+```
+
+:::
+
 ```{r}
 #| label: tbl-publication
 #| echo: false
