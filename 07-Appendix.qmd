@@ -73,3 +73,14 @@ dir.create("outputs")
 
 wb_save(wbook, file = "outputs/Supplementary_data.xlsx")
 ```
+
+```{r}
+#| eval: true
+#| echo: false
+
+# This another saving is for purpose of the book to have a a valid path to the file
+wb_save(wbook, file = "Supplementary_data.xlsx")
+```
+
+
+[Supplementary table](Supplementary_data.xlsx) for download
