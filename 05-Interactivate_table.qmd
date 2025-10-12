@@ -39,7 +39,7 @@ Let's use a subset of the `vegetation` data (C4 species of Kenya) while working 
 ```{r}
 #| label: fig-violin-plot
 #| fig-align: center
-#| fig-height: 1
+#| fig-height: 3
 
 data_to_plot <- dat_vegetation |>
   filter(country == "Kenya", type == "C<sub>4</sub>")
@@ -67,12 +67,11 @@ p_violin <- ggplot(data_to_plot, aes(x = country, y = delta)) +
 
 girafe(
   ggobj = p_violin,
-  width_svg = 2,
-  height_svg = 1,
   options = "css = background-color: transparent;"
 ) |>
   girafe_options(
-    opts_tooltip(css = "background-color: white; text-color: black; font-style: italic;")
+    opts_tooltip(css = "background-color: white; text-color: black; font-style: italic;"),
+    opts_sizing(rescale = TRUE, width = .65)
   )
 ```
 
@@ -120,9 +119,10 @@ PlotGirafeViolins <- function(data_to_plot){
     height_svg = 1.5,
     options = "css = background-color: transparent;"
   ) |>
-    girafe_options(
-      opts_tooltip(css = "background-color: white; text-color: black; font-style: italic;")
-    )
+  girafe_options(
+    opts_tooltip(css = "background-color: white; text-color: black; font-style: italic;"),
+    opts_sizing(rescale = TRUE, width = .65)
+  )
 
   # Save the ggiraph plot to a temporary HTML file
   tmpfile <- tempfile(fileext = ".html")
