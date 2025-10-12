@@ -4862,7 +4862,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">The Table Contest</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Motivation</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -4878,6 +4878,9 @@ window.Quarto = {
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="./">{gt} tables for scientific projects</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/emaleckova/2025-Table-Contest" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+</div>
     </div>
       </div>
         <div class="mt-2 flex-shrink-0 align-items-center">
@@ -4890,7 +4893,7 @@ window.Quarto = {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./index.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">The Table Contest</span></span></a>
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Motivation</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -4954,7 +4957,7 @@ window.Quarto = {
   <li><a href="#motivation" id="toc-motivation" class="nav-link active" data-scroll-target="#motivation"><span class="header-section-number">1</span> Motivation</a></li>
   <li><a href="#data" id="toc-data" class="nav-link" data-scroll-target="#data"><span class="header-section-number">2</span> Data</a></li>
   </ul>
-</nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/emaleckova/2025-Table-Contest/blob/main/index.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/emaleckova/2025-Table-Contest/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -4990,7 +4993,7 @@ window.Quarto = {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout callout-style-default callout-note callout-titled" title="The Table Contest">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -5007,7 +5010,7 @@ The Table Contest
 <h1 data-number="1"><span class="header-section-number">1</span> Motivation</h1>
 <p>I am making this tutorial for some six years younger me. I was in the second year of graduate school, working on my first manuscripts and gaining first experiences with <code>R</code> - specifically, with analysis of mRNA-sequencing data and making first visualizations with the <code>{ggplot2}</code>. While it felt natural to create figures programmatically, I never considered this option for tables and unfortunately did not develop a lot in this regard by the time I was writing my thesis. Luckily, I discovered the <code>{gt}</code> package for my current job and can say:</p>
 <blockquote class="blockquote">
-<p>Who wants reproducible, well-documented work and matching visual elements should pay attention to the <code>{gt}</code> package.</p>
+<p>Who wants reproducible, well-documented work and matching visual elements throughtout various outputs should pay attention to the <code>{gt}</code> package.</p>
 </blockquote>
 <p>My aim is to show that with the <code>{gt}</code> package, it is possible to create a minimalist summary tables ready for a publication (<a href="02-Publication_table.html" class="quarto-xref"><span>Chapter 3</span></a>), a small table accompanying a chart (<a href="03-Plot_table_assembly.html" class="quarto-xref"><span>Chapter 4</span></a>) as well as visually advanced tables suitable - <em>e.g.</em>, for a poster - (<a href="04-Poster_design.html" class="quarto-xref"><span>Chapter 5</span></a>) and even interactive tables - <em>e.g.</em>, for a laboratory/project website (<a href="05-Interactivate_table.html" class="quarto-xref"><span>Chapter 6</span></a>). For scientific topics, we may have special requirements such as italicized taxonomic names, use of subscripts or Greek characters. Thanks to <code>{gt}</code>’s inbuilt formatting options and support of <code>markdown</code> and <code>HTML</code> notions, all of these are easy tasks.</p>
 <p>Throught the chapters of this book, we will see that with only minimal customizations, we can create very nice tables. In chapters of this tutorial, we will see how much of an impact a little bit of <code>HTML</code>and <code>CSS</code> can have to control the overall table design (<a href="04-Poster_design.html" class="quarto-xref"><span>Chapter 5</span></a>) or to fine-tune positioning of elements (specifically a footnote in <a href="06-Column_fill.html" class="quarto-xref"><span>Chapter 7</span></a>).</p>
@@ -5456,4 +5459,4 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-</body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/emaleckova/2025-Table-Contest/blob/main/index.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/emaleckova/2025-Table-Contest/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
