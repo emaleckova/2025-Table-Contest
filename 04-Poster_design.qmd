@@ -406,10 +406,12 @@ tbl_with_plots_gradient <- summarized_tbl_input |>
     mean_d ~ px(100)
   ) |> 
   opt_css(css ="
+    /*Background for the entire table*/
     #countries_tbl .gt_table {
       background: linear-gradient(180deg, #7DA37BFF, #DBD797);
     }
     
+    /*All transparency control for the plots*/
     #countries_tbl .gt_col_heading, #countries_tbl .gt_column_spanner_outer, #countries_tbl .gt_row.gt_center.gt_stub, #countries_tbl .gt_row.gt_center.gt_stub_row_group, #countries_tbl .gt_row.gt_left.gt_stub_row_group {
       background: transparent; border-right-style: none; vertical-align: middle;
     }")
