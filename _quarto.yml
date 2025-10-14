@@ -4,7 +4,7 @@ project:
 book:
   title: "{gt} tables for scientific projects"
   author: "Eva Maleckova"
-  date: "Oct 02 2025"
+  date: "Oct 14 2025"
   repo-url: "https://github.com/emaleckova/2025-Table-Contest"
   repo-actions: ["source", "issue"]
   chapters:
