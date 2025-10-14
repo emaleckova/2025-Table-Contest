@@ -45,7 +45,7 @@ data_to_plot <- dat_vegetation |>
   filter(country == "Kenya", type == "C<sub>4</sub>")
 
 p_violin <- ggplot(data_to_plot, aes(x = country, y = delta)) +
-  geom_violin(colour = "#005C55FF", fill = "#005C55FF", alpha = 0.25) +
+  geom_violin(colour = "#005C55FF", fill = "#005C55FF", alpha = 0.5) +
   geom_jitter_interactive(aes(tooltip = species), shape = 21, size = 1.5, fill = "#005C55FF", colour = "white") +
   scale_y_continuous(breaks = c(-10, -20, -30, -40)) +
   coord_cartesian(ylim = c(-45, -10)) +
@@ -120,11 +120,7 @@ PlotGirafeViolins <- function(data_to_plot){
   ) |>
   girafe_options(
     opts_tooltip(css = "background-color: white; text-color: black; font-style: italic;"),
-    opts_sizing(rescale = FALSE, width = 1),
-    opts_hover_inv(css = "opacity:0.3;"),
-    opts_hover(css = "opacity:1;"),
-    opts_selection(css = "opacity:1;"),
-    opts_zoom(min = 1, max = 3)
+    opts_sizing(rescale = FALSE, width = 1)
   )
 
   # Save the ggiraph plot to a temporary HTML file
@@ -173,6 +169,13 @@ text_transform(
 
 And integrated with the remaining code, we get a table with known design and components but interactive charts:
 
+:::{.callout-note}
+## Transparency of ggiraph plots
+
+While identifying the right `CSS` classes to ensure transparent background in static ggplot2 object was quite easy (@sec-table-with-css), it turned out trickier for plots created with the `{ggiraph}` package. The key was identifying the `ggiraph-svg-bg` and setting its `fill` to `transparent`.
+
+:::
+
 ```{r}
 #| label: tbl-with-interactive-ggiraph
 #| html-table-processing: "none"
@@ -180,6 +183,9 @@ And integrated with the remaining code, we get a table with known design and com
 
 summarized_tbl_input |> 
   mutate(violin_plot = "") |>
+  # this to to add markdown syntax for bold font face
+  # because of the subscript, the type column remained affected by tab_style()
+  mutate(type = paste0("**", type, "**")) |> 
   gt(
     id = "countries_tbl",
     rowname_col = "type",
@@ -202,7 +208,7 @@ summarized_tbl_input |>
     locations = cells_row_groups(),
     fn = function(x) {
       lapply(x, function(y) {
-        html(PlotCountry(y) |> ggplot_image(height = px(175), aspect_ratio = 1))
+        html(PlotCountry(y) |> ggplot_image(height = px(200), aspect_ratio = 1))
       })
     }
   ) |> 
@@ -225,10 +231,21 @@ summarized_tbl_input |>
   ) |> 
   tab_style(
     style = list(
-      cell_text(align = "center")
+      # bold face fits better to the quite prominent ggiraph axis
+      cell_text(align = "center", weight = "bold")
     ),
     locations = cells_body(columns = everything())
-  ) |>
+    ) |>
+  # match column spanners
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_spanners(spanners = everything())
+    ) |> 
+  # and column labels
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels(everything())
+    ) |> 
   tab_options(
     heading.title.font.size = 12,
     footnotes.font.size = 12,
@@ -263,22 +280,10 @@ summarized_tbl_input |>
       max-width: 180px !important;
     }
     
-    #countries_tbl .htmlwidget svg {
-      background: transparent !important;
-    }
-    
-    #countries_tbl .ggiraph {
-      background: transparent !important;
-    }
-    
     /* Target the white background rect elements that ggiraph creates */
     #countries_tbl .ggiraph-svg-bg {
       fill: transparent !important;
       stroke: transparent !important;
-    }
-    
-    #countries_tbl .ggiraph-svg-rootg, #countries_tbl girafe_container_std {
-      background: transparent !important;
     }") |> 
   tab_footnote(md(folio_footnote)) |> 
   tab_style(style = cell_text(align = "left"), locations = cells_footnotes()) |> 

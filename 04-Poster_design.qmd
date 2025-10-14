@@ -316,7 +316,7 @@ tbl_with_plots |>
   tab_options(table.width = px(800))
 ```
 
-## Advanced modifications with `CSS`
+## Advanced modifications with `CSS` {#sec-table-with-css}
 
 This is not too bad - but what about setting a nice background colour and adjusting cell borders accordingly? With predefined arguments of `tab_options()` and a little bit of CSS, we can do a lot with relatively little of a code. Even a gradient background! Albert Rapp has done a great job in explaining the `CSS` part in his [tutorial](https://gt.albert-rapp.de/styling#sec-custom-css) and I will thus refer you to this source. Here, I will only highlight the importance of setting an `id` to our gt table like this:
 
