@@ -71,7 +71,9 @@ girafe(
 ) |>
   girafe_options(
     opts_tooltip(css = "background-color: white; text-color: black; font-style: italic;"),
-    opts_sizing(rescale = TRUE, width = 1)
+    opts_sizing(rescale = TRUE, width = 1),
+    # do not show any of toolbar icons
+    opts_toolbar(hidden = c("Selection", "Zoom", "Misc"), saveaspng = F)
   )
 ```
 
