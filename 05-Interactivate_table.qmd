@@ -116,12 +116,15 @@ PlotGirafeViolins <- function(data_to_plot){
   g_violin <- girafe(
     ggobj = p_violin,
     width_svg = 2,
-    height_svg = 2.5,
-    options = "css = svg { background: transparent !important; } .ggiraph { background: transparent !important; }"
+    height_svg = 2.5
   ) |>
   girafe_options(
     opts_tooltip(css = "background-color: white; text-color: black; font-style: italic;"),
-    opts_sizing(rescale = FALSE, width = 1)
+    opts_sizing(rescale = FALSE, width = 1),
+    opts_hover_inv(css = "opacity:0.3;"),
+    opts_hover(css = "opacity:1;"),
+    opts_selection(css = "opacity:1;"),
+    opts_zoom(min = 1, max = 3)
   )
 
   # Save the ggiraph plot to a temporary HTML file
@@ -135,7 +138,7 @@ PlotGirafeViolins <- function(data_to_plot){
 }
 ```
 
-In the overall table layout, we can apply all what we have learned before (grouping of rows, use of the `process_md argument`, modifying column labels, etc.), but the `text_transform()` call will become a little more complicated. First of all, we use summarized data `summarized_tbl_input` as a basis for the resulting table (input for the (`gt()` function). At the same time, we need access to the pre-processed, full-length data set (`dat_vegetation`) which is the input for our custom `PlotGirafeViolins()` function.
+In the overall table layout, we can apply all what we have learned before (grouping of rows, use of the `process_md argument`, modifying column labels, etc.), but the `text_transform()` call will become a little more complicated. First of all, we use summarized data `summarized_tbl_input` as a basis for the resulting table (input for the `gt()` function). At the same time, we need access to the pre-processed, full-length data set (`dat_vegetation`) which is the input for our custom `PlotGirafeViolins()` function.
 
 To generate the correct violin and scatter plot for each row of the resulting table, we: 
 
